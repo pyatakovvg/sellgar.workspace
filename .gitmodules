@@ -9,12 +9,16 @@
 [submodule "frontend/sellgar.ui.desktop"]
 	path = frontend/sellgar.ui.desktop
 	url = git@github.com:pyatakovvg/sellgar.ui.desktop.git
-	branch = main
+	branch = master
 [submodule "mobile/sellgar.mobile"]
 	path = mobile/sellgar.mobile
 	url = git@github.com:pyatakovvg/sellgar.mobile.git
-	branch = main
+	branch = master
 [submodule "backend/sellgar.server"]
 	path = backend/sellgar.server
 	url = git@github.com:pyatakovvg/sellgar.server.git
+	branch = master
+[submodule "backend/sellgar.admin.gateway"]
+	path = backend/sellgar.admin.gateway
+	url = git@github.com:pyatakovvg/sellgar.admin.gateway.git
 	branch = master
