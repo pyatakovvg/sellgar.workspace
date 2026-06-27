@@ -19,18 +19,18 @@
 	url = git@github.com:pyatakovvg/sellgar.server.git
 	branch = master
 [submodule "backend/sellgar.admin.gateway"]
-	path = backend/sellgar.admin.gateway
+	path = backend/gateway/sellgar.admin.gateway
 	url = git@github.com:pyatakovvg/sellgar.admin.gateway.git
 	branch = master
 [submodule "backend/sellgar.product.service"]
-	path = backend/sellgar.product.service
+	path = backend/service/sellgar.product.service
 	url = git@github.com:pyatakovvg/sellgar.product.service.git
 	branch = master
 [submodule "backend/sellgar.identity.service"]
-	path = backend/sellgar.identity.service
+	path = backend/service/sellgar.identity.service
 	url = git@github.com:pyatakovvg/sellgar.identity.service.git
 	branch = master
 [submodule "backend/sellgar.file.service"]
-	path = backend/sellgar.file.service
+	path = backend/service/sellgar.file.service
 	url = git@github.com:pyatakovvg/sellgar.file.service.git
 	branch = master
