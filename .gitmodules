@@ -26,3 +26,7 @@
 	path = backend/sellgar.product.service
 	url = git@github.com:pyatakovvg/sellgar.product.service.git
 	branch = master
+[submodule "backend/sellgar.identity.service"]
+	path = backend/sellgar.identity.service
+	url = git@github.com:pyatakovvg/sellgar.identity.service.git
+	branch = master
