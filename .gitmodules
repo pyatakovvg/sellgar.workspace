@@ -1,0 +1,20 @@
+[submodule "frontend/sellgar.ui.admin"]
+	path = frontend/sellgar.ui.admin
+	url = git@github.com:pyatakovvg/sellgar.ui.admin.git
+	branch = master
+[submodule "frontend/sellgar.ui.kit"]
+	path = frontend/sellgar.ui.kit
+	url = git@github.com:pyatakovvg/sellgar.ui.kit.git
+	branch = master
+[submodule "frontend/sellgar.ui.desktop"]
+	path = frontend/sellgar.ui.desktop
+	url = git@github.com:pyatakovvg/sellgar.ui.desktop.git
+	branch = main
+[submodule "mobile/sellgar.mobile"]
+	path = mobile/sellgar.mobile
+	url = git@github.com:pyatakovvg/sellgar.mobile.git
+	branch = main
+[submodule "backend/sellgar.server"]
+	path = backend/sellgar.server
+	url = git@github.com:pyatakovvg/sellgar.server.git
+	branch = master
