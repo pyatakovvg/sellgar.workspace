@@ -10,6 +10,8 @@ REPOS=(
   "sellgar.admin.gateway"
   "sellgar.identity.service"
   "sellgar.product.service"
+  "sellgar.store.service"
+  "sellgar.shop.service"
   "sellgar.file.service"
   "sellgar.media.service"
   "sellgar.ui.admin"
@@ -22,6 +24,8 @@ CLONE_REPOS=(
   "sellgar.admin.gateway"
   "sellgar.identity.service"
   "sellgar.product.service"
+  "sellgar.store.service"
+  "sellgar.shop.service"
   "sellgar.file.service"
   "sellgar.media.service"
   "sellgar.ui.admin"
@@ -45,6 +49,12 @@ repo_dir() {
       ;;
     sellgar.product.service)
       printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.product.service"
+      ;;
+    sellgar.store.service)
+      printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.store.service"
+      ;;
+    sellgar.shop.service)
+      printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.shop.service"
       ;;
     sellgar.file.service)
       printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.file.service"

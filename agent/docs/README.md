@@ -27,6 +27,8 @@
 | Admin gateway | `backend/gateway/sellgar.admin.gateway/AGENTS.md` | build/run/smoke из [dev-command-matrix.md](dev-command-matrix.md) |
 | Identity service | `backend/service/sellgar.identity.service/AGENTS.md` | build/run/smoke из [dev-command-matrix.md](dev-command-matrix.md) |
 | Product service | `backend/service/sellgar.product.service/AGENTS.md` | product contract smoke, особенно images/variants |
+| Store service | `backend/service/sellgar.store.service/AGENTS.md` | sellable product design/build |
+| Shop service | `backend/service/sellgar.shop.service/AGENTS.md` | shop/channel design/build |
 | File service | `backend/service/sellgar.file.service/AGENTS.md` | file metadata API smoke |
 | Media service | `backend/service/sellgar.media.service/AGENTS.md` | media upload/CDN/MinIO smoke |
 | Admin frontend | `frontend/sellgar.ui.admin/AGENTS.md` | browser/manual smoke + frontend build |
@@ -41,6 +43,8 @@ Backend:
 - `backend/gateway/sellgar.admin.gateway/AGENTS.md`
 - `backend/service/sellgar.identity.service/AGENTS.md`
 - `backend/service/sellgar.product.service/AGENTS.md`
+- `backend/service/sellgar.store.service/AGENTS.md`
+- `backend/service/sellgar.shop.service/AGENTS.md`
 - `backend/service/sellgar.file.service/AGENTS.md`
 - `backend/service/sellgar.media.service/AGENTS.md`
 

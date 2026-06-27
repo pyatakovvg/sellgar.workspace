@@ -35,6 +35,8 @@ Build доказывает только компиляцию. Для задач 
 
 `sellgar.identity.service` и `sellgar.product.service` сейчас работают как RMQ-only сервисы и не дают HTTP `/health`. Их работоспособность проверяется через успешный запуск, логи подписки на очередь и сценарий через gateway/frontend.
 
+`sellgar.store.service` и `sellgar.shop.service` также подготовлены как RMQ-only scaffolds. До проектирования доменной схемы проверять только Yarn/build/bootstrap.
+
 ## Dependency Install
 
 Если зависимости отсутствуют или lockfile требует обновления, а пользователь просил устанавливать вручную, остановись и попроси пользователя выполнить install/update в нужном repo. Не пытайся лечить dependency tree обходными командами.

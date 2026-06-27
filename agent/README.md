@@ -9,6 +9,8 @@
 | Backend gateway | `backend/gateway/sellgar.admin.gateway` | Admin API gateway |
 | Backend service | `backend/service/sellgar.identity.service` | Identity/session service |
 | Backend service | `backend/service/sellgar.product.service` | Product catalog service |
+| Backend service | `backend/service/sellgar.store.service` | Sellable products, future prices/stock/reservations |
+| Backend service | `backend/service/sellgar.shop.service` | Shops/sales channels |
 | Backend service | `backend/service/sellgar.file.service` | File metadata service |
 | Backend service | `backend/service/sellgar.media.service` | Media upload/CDN/MinIO service |
 | Frontend | `frontend/sellgar.ui.admin` | Admin frontend |

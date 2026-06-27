@@ -34,3 +34,11 @@
 	path = backend/service/sellgar.media.service
 	url = git@github.com:pyatakovvg/sellgar.media.service.git
 	branch = master
+[submodule "backend/service/sellgar.store.service"]
+	path = backend/service/sellgar.store.service
+	url = git@github.com:pyatakovvg/sellgar.store.service.git
+	branch = master
+[submodule "backend/service/sellgar.shop.service"]
+	path = backend/service/sellgar.shop.service
+	url = git@github.com:pyatakovvg/sellgar.shop.service.git
+	branch = master

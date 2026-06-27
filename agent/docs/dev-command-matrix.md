@@ -66,6 +66,40 @@ yarn start:dev
 
 Сервис сейчас RMQ-only: HTTP port/`/health` не поднимается. Для product changes build недостаточен. Минимальный smoke: получить/сохранить товар с variants/images через admin UI или gateway/API consumer.
 
+### Store Service
+
+Рабочая директория:
+
+```bash
+cd backend/service/sellgar.store.service
+```
+
+Команды:
+
+```bash
+yarn build
+yarn start:dev
+```
+
+Сервис подготовлен как RMQ-only scaffold. Таблицы `store_product`, `store_variant`, price history, inventory и reservation проектировать до реализации.
+
+### Shop Service
+
+Рабочая директория:
+
+```bash
+cd backend/service/sellgar.shop.service
+```
+
+Команды:
+
+```bash
+yarn build
+yarn start:dev
+```
+
+Сервис подготовлен как RMQ-only scaffold. Модель shop/channel проектировать до переноса legacy `shop`.
+
 ### File Service
 
 Рабочая директория:
