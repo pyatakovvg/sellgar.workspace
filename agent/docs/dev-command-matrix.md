@@ -98,7 +98,7 @@ yarn build
 yarn start:dev
 ```
 
-Сервис подготовлен как RMQ-only scaffold. Модель shop/channel проектировать до переноса legacy `shop`.
+Сервис RMQ-only. Сейчас владеет таблицей `shop` и командами `shop.getAll`, `shop.getByUuid`, `shop.create`, `shop.update`.
 
 ### File Service
 
