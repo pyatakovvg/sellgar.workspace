@@ -22,3 +22,7 @@
 	path = backend/sellgar.admin.gateway
 	url = git@github.com:pyatakovvg/sellgar.admin.gateway.git
 	branch = master
+[submodule "backend/sellgar.product.service"]
+	path = backend/sellgar.product.service
+	url = git@github.com:pyatakovvg/sellgar.product.service.git
+	branch = master
