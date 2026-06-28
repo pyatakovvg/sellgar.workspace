@@ -95,12 +95,10 @@ property_group
 property
 unit
 image
-currency
 ```
 
-`currency` можно временно оставить в `product_srv`, потому что она уже используется текущим кодом.
-Перед развитием pricing стоит решить, будет ли currency общей справочной областью или частью
-`store_srv`.
+`currency` для pricing живет в `store_srv` как предзаполненный локальный справочник. Таблица валют
+не является частью каталога: catalog product/variant не должен владеть ценой или валютой продажи.
 
 События:
 
@@ -265,8 +263,6 @@ product_snapshot
   source_version
   name
   status
-  brand_uuid
-  category_uuid
   synced_at
 
 variant_snapshot
@@ -281,6 +277,51 @@ variant_snapshot
 Snapshot не является источником истины. Он нужен для быстрой проверки и чтения без постоянных
 синхронных запросов в `product_srv` и `shop_srv`.
 
+Snapshot всегда должен оставаться минимальным. Нельзя превращать snapshot в дубликат полного
+агрегата владельца. Если frontend или внешний API требует полноценную модель товара, варианта,
+магазина, бренда, категории, свойств или изображений, сборка такой модели выполняется в gateway/BFF
+через запросы к сервисам-владельцам и `store_srv`.
+
+DDD naming rule: если сущность описывает одну и ту же бизнес-модель, она сохраняет свое имя в
+ubiquitous language. `currency` остается `currency` в любом сервисе, а не `shopCurrency`,
+`variantCurrency` или `storeCurrency`. То же правило относится к `product`, `variant`, `shop`,
+`brand`, `category` и другим общим понятиям. Snapshot/read-model может иметь технический суффикс
+`_snapshot`, но не должен менять бизнес-смысл сущности.
+
+## Event Envelope
+
+Все внешние integration events между сервисами используют общий envelope:
+
+```text
+event_uuid
+event_type              -- product.created, variant.updated, shop.archived
+schema_version
+producer                -- product_srv, shop_srv, store_srv
+aggregate_type          -- product, variant, shop, store_product, offer, inventory
+aggregate_uuid
+aggregate_version
+occurred_at
+payload jsonb
+```
+
+Правила:
+
+- `event_uuid` глобально уникален и используется для idempotency в `inbox_event`.
+- `aggregate_version` монотонно растет внутри сервиса-владельца агрегата.
+- Consumer применяет событие только если версия не нарушает локальный порядок.
+- Внешнее событие не должно требовать чтения чужой БД для базовой обработки.
+- Внешние события являются integration contract. Их нельзя менять без `schema_version`.
+
+Внутреннее доменное событие и внешнее integration event не одно и то же:
+
+```text
+domain event внутри сервиса
+  -> outbox integration event
+  -> RabbitMQ
+  -> consumer inbox
+  -> local snapshot/read-model update
+```
+
 ## Outbox/Inbox
 
 Каждый сервис, который публикует доменные события, должен иметь outbox:
@@ -288,10 +329,12 @@ Snapshot не является источником истины. Он нуже�
 ```text
 outbox_event
   uuid pk
+  producer
   aggregate_type
   aggregate_uuid
   aggregate_version
   event_type
+  schema_version
   payload jsonb
   occurred_at
   published_at nullable
@@ -306,6 +349,7 @@ outbox_event
 inbox_event
   event_uuid pk
   producer
+  schema_version
   event_type
   aggregate_type
   aggregate_uuid
@@ -344,6 +388,91 @@ if incoming aggregate_version > current snapshot source_version + 1:
   do not apply blindly
   ack only after issue is persisted
 ```
+
+`ack` в RabbitMQ выполняется только после commit локальной транзакции. Если обработчик упал до
+commit, сообщение должно быть доставлено повторно, а `inbox_event` защищает от дублей.
+
+### Текущее внедрение в Sellgar
+
+На текущем этапе механизм transactional outbox вынесен в отдельную библиотеку
+`sellgar.outbox.library` и подключен в `sellgar.product.service` как nested
+submodule внутри service-local monorepo:
+
+```text
+sellgar.product.service/
+  service/                         -- приложение product_srv
+  library/
+    sellgar.outbox.library/        -- @sellgar/outbox
+```
+
+`@sellgar/outbox` владеет только инфраструктурой:
+
+- `OutboxEventModel`;
+- `OutboxWriter`;
+- claim publishable events через `FOR UPDATE SKIP LOCKED`;
+- retry/backoff через `next_attempt_at`;
+- recovery зависших `processing` записей;
+- publish timeout;
+- metrics по pending/failed/processing.
+
+Доменные сервисы по-прежнему владеют именами событий, payload, версиями агрегатов
+и тем, в какой транзакции событие должно быть записано. Product service должен
+передавать текущий TypeORM `EntityManager` в `OutboxWriter`, чтобы доменное
+изменение и запись в `outbox_event` коммитились атомарно.
+
+Важно: `OutboxModule` должен получать RabbitMQ `ClientProxy` через явный Nest DI
+token. Если client не зарегистрирован, сервис должен падать на старте, а не
+продолжать работу с `null` publisher.
+
+Проверенный E2E-контур на 2026-06-28:
+
+```text
+admin UI
+  -> admin gateway
+  -> product_srv write
+  -> product_srv.outbox_event
+  -> RabbitMQ event.exchange
+  -> store_srv inbox_event
+  -> store_srv.variant_snapshot
+```
+
+Проверочный пример: добавление варианта товара в UI создало `variant.created`,
+событие получило `published` в `product_srv.outbox_event`, было обработано как
+`processed` в `store_srv.inbox_event`, после чего появился минимальный
+`variant_snapshot`.
+
+## Sync Issues And Reconciliation
+
+Consumer не применяет событие вслепую, если видит разрыв версий или отсутствующего родителя:
+
+```text
+sync_issue
+  uuid pk
+  producer
+  aggregate_type
+  aggregate_uuid
+  expected_version nullable
+  received_version
+  event_uuid
+  reason                  -- version_gap, missing_parent, validation_failed
+  payload jsonb
+  status                  -- open, resolved, ignored
+  created_at
+  resolved_at nullable
+```
+
+Типовые случаи:
+
+- `variant.created` пришел раньше `product.created` -> `missing_parent`.
+- `product.updated` version 5 пришел после version 2 -> `version_gap`.
+- payload не проходит локальную валидацию -> `validation_failed`.
+
+Reconciliation job позже обязан уметь:
+
+1. Читать open `sync_issue`.
+2. Запрашивать актуальный aggregate у владельца через service API.
+3. Перестраивать snapshot до актуальной версии.
+4. Помечать issue как `resolved`.
 
 ## Command Idempotency
 
@@ -400,6 +529,68 @@ createStoreProduct(commandId, shopUuid, productUuid, variantUuids)
 6. Return created aggregate.
 ```
 
+## Write Flow: Update Store Product
+
+```text
+updateStoreProduct(commandId, storeProductUuid, expectedVersion, patch)
+
+1. Check command_request by commandId.
+2. Load store_product by uuid.
+3. Check expectedVersion == current version.
+4. Validate changed shop/product/variant ids through snapshots.
+5. In one local transaction:
+   - update store_product version = version + 1
+   - upsert/archive store_variant_offer rows
+   - if price changed, insert a new price_history row
+   - if inventory changed, update inventory version = version + 1
+   - insert command_request result
+   - insert outbox_event store.product.updated
+6. Return updated aggregate.
+```
+
+Если `expectedVersion` не совпал, команда возвращает conflict. Она не должна перетирать изменения
+другого клиента.
+
+## Write Flow: Archive Store Product
+
+Hard delete для продаваемых товаров запрещен по умолчанию: cart/order/price history/reservation
+могут ссылаться на offer. Удаление реализуется как archive:
+
+```text
+archiveStoreProduct(commandId, storeProductUuid, expectedVersion)
+
+1. Check command_request by commandId.
+2. Check expectedVersion.
+3. In one local transaction:
+   - update store_product status = archived, version = version + 1
+   - update active offers status = archived, version = version + 1
+   - keep price_history and inventory audit rows
+   - insert command_request result
+   - insert outbox_event store.product.archived
+```
+
+Физическое удаление допускается только для черновика, который не был опубликован и не имеет
+истории/резервов/заказов. Это отдельная команда, не стандартный delete.
+
+## Snapshot Event Handling
+
+`store_srv` применяет события владельцев так:
+
+```text
+shop.created / shop.updated / shop.archived
+  -> upsert shop_snapshot
+
+product.created / product.updated / product.archived
+  -> upsert product_snapshot
+
+variant.created / variant.updated / variant.archived
+  -> validate product_snapshot exists
+  -> upsert variant_snapshot
+```
+
+Snapshots не являются source of truth. Они нужны для локальной проверки команд и быстрых read-model
+ответов. Сервис не должен строить бизнес-решение только на голом UUID без snapshot-проверки.
+
 ## Read Flow: Store Product Details
 
 `store_srv` can return a composed view using local tables and snapshots:
@@ -417,9 +608,9 @@ store_product
 Если UI нужна полная карточка каталога с properties/images, варианты:
 
 1. Gateway/BFF собирает данные из `product_srv` и `store_srv`.
-2. `store_srv` хранит расширенный product/variant snapshot с properties/images.
 
-На старте лучше выбрать вариант 1, чтобы не раздувать snapshot до полного каталога.
+`store_srv` не расширяет product/variant snapshot до properties/images. Иначе snapshot становится
+дубликатом каталога и нарушает границу ownership.
 
 ## Cart And Order Boundary
 
@@ -480,7 +671,7 @@ cart -> order draft -> inventory reserve -> payment -> order confirm -> reservat
 | `cart` | future `cart_srv` | не развивать в `product_srv` и не переносить в `store_srv` |
 | `order` | future `order_srv` | не развивать в `product_srv` и не переносить в `store_srv` |
 | `user` | `identity_srv` projection or remove later | проверить текущих потребителей |
-| `currency` | unresolved | временно оставить, потом решить common reference vs store pricing |
+| `currency` | `store_srv` | предзаполненный справочник для pricing; имя сущности остается `currency` |
 
 Порядок безопасного переноса:
 
@@ -497,9 +688,7 @@ cart -> order draft -> inventory reserve -> payment -> order confirm -> reservat
 
 ## Open Decisions
 
-- Где будет жить `currency`: общий справочник, `store_srv` или отдельный reference service.
+- Нужен ли отдельный reference service для общих справочников позже. На текущем этапе `currency`
+  для pricing живет в `store_srv`.
 - Нужен ли `warehouse_srv`, если остатки станут многоскладскими.
-- Должен ли `store_srv` хранить расширенный snapshot variant properties/images или это будет
-  ответственность gateway/BFF composition.
-- Какой формат event envelope стандартизировать для всех сервисов.
-- Какие команды требуют строгий `commandId` уже в первой итерации.
+- Какой минимальный reconciliation API должен быть у `product_srv` и `shop_srv`.
