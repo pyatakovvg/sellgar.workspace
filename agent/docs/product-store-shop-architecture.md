@@ -210,7 +210,8 @@ shop.deleted
 - `store_offer` - продажное предложение конкретного `variant` внутри конкретного
   `store_product`.
 - `price_history` - история цены `store_offer`.
-- `inventory` - остаток и резерв `store_offer`.
+- `offer_inventory` - текущее состояние остатка и резерва `store_offer`.
+- `inventory_movement` - история причин, по которым изменился остаток или резерв.
 
 Ключевая формула модели:
 
@@ -219,7 +220,8 @@ Product -> Variant
 Shop + Product -> StoreProduct
 StoreProduct + Variant -> Offer
 Offer -> PriceHistory
-Offer -> Inventory
+Offer -> OfferInventory
+Offer -> InventoryMovement
 ```
 
 `Offer` не является nullable-добавкой к `variant`. Если вариант еще не продается в магазине, для
@@ -266,13 +268,25 @@ price_history
   reason nullable
   created_at
 
-inventory
+offer_inventory
   uuid pk
   offer_uuid fk -> store_offer.uuid
   quantity
   reserved
   version
   updated_at
+
+inventory_movement
+  uuid pk
+  offer_uuid fk -> store_offer.uuid
+  type
+  quantity_delta
+  reserved_delta
+  source_type
+  source_uuid nullable
+  reason nullable
+  created_by nullable
+  created_at
 
 reservation
   uuid pk
@@ -629,7 +643,6 @@ updateStoreProduct(commandId, storeProductUuid, expectedVersion, patch)
    - update store_product version = version + 1
    - upsert/archive store_offer rows
    - if price changed, insert a new price_history row
-   - if inventory changed, update inventory version = version + 1
    - insert command_request result
    - insert outbox_event store.product.updated
 6. Return updated aggregate.
@@ -637,6 +650,37 @@ updateStoreProduct(commandId, storeProductUuid, expectedVersion, patch)
 
 Если `expectedVersion` не совпал, команда возвращает conflict. Она не должна перетирать изменения
 другого клиента.
+
+`updateStoreProduct` не меняет остатки. Остаток не является обычным редактируемым полем
+карточки offer.
+
+## Write Flow: Inventory Movement
+
+```text
+receiptInventory(commandId, offerUuid, expectedVersion, quantity, reason)
+writeOffInventory(commandId, offerUuid, expectedVersion, quantity, reason)
+adjustInventory(commandId, offerUuid, expectedVersion, quantity, reason)
+
+1. Check command_request by commandId.
+2. Load offer_inventory by offerUuid.
+3. Check expectedVersion == offer_inventory.version.
+4. Calculate delta:
+   - receipt: quantity_delta = +quantity
+   - write_off: quantity_delta = -quantity
+   - adjustment: quantity_delta = requested quantity - current quantity
+5. Validate new state:
+   - quantity >= 0
+   - reserved >= 0
+   - reserved <= quantity
+6. In one local transaction:
+   - update offer_inventory quantity/reserved/version
+   - insert inventory_movement
+   - insert command_request result
+```
+
+Для UI это означает: пользователь не вводит новое `quantity` в основной форме товара. Он
+выполняет действие `Приход`, `Списание` или `Корректировка`; сервис сохраняет текущее
+состояние и аудит движения в одной транзакции.
 
 ## Write Flow: Archive Store Product
 
@@ -686,7 +730,8 @@ Snapshots не являются source of truth. Они нужны для лок
 store_product
   + store_offer[]
   + current price per offer
-  + inventory per offer
+  + offer_inventory per offer
+  + inventory_movement[] when history is explicitly requested
   + product_snapshot
   + variant_snapshot[]
   + shop_snapshot
@@ -765,7 +810,7 @@ cart -> order draft -> inventory reserve -> payment -> order confirm -> reservat
 1. Добавить TypeORM подключение в `shop_srv` и `store_srv`.
 2. Создать минимальную модель `shop` в `shop_srv`.
 3. Создать `shop_snapshot`, `product_snapshot`, `variant_snapshot` в `store_srv`.
-4. Добавить `store_product`, `store_offer`, `price_history`, `inventory`.
+4. Добавить `store_product`, `store_offer`, `price_history`, `offer_inventory`, `inventory_movement`.
 5. Добавить outbox/inbox skeleton и idempotent command table.
 6. Подключить события/sync для `shop` и `product/variant`.
 7. Добавить новые command patterns для `store_srv`.
