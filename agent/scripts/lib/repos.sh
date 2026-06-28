@@ -10,6 +10,7 @@ REPOS=(
   "sellgar.admin.gateway"
   "sellgar.identity.service"
   "sellgar.product.service"
+  "sellgar.outbox.library"
   "sellgar.store.service"
   "sellgar.shop.service"
   "sellgar.file.service"
@@ -24,6 +25,7 @@ CLONE_REPOS=(
   "sellgar.admin.gateway"
   "sellgar.identity.service"
   "sellgar.product.service"
+  "sellgar.outbox.library"
   "sellgar.store.service"
   "sellgar.shop.service"
   "sellgar.file.service"
@@ -49,6 +51,9 @@ repo_dir() {
       ;;
     sellgar.product.service)
       printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.product.service"
+      ;;
+    sellgar.outbox.library)
+      printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.product.service/library/sellgar.outbox.library"
       ;;
     sellgar.store.service)
       printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.store.service"
@@ -85,4 +90,26 @@ repo_path() {
   local dir
   dir="$(repo_dir "$repo")" || return 1
   realpath --relative-to="$WORKSPACE_DIR" "$dir"
+}
+
+repo_superproject_dir() {
+  local repo="$1"
+
+  case "$repo" in
+    sellgar.outbox.library)
+      repo_dir "sellgar.product.service"
+      ;;
+    *)
+      printf '%s\n' "$WORKSPACE_DIR"
+      ;;
+  esac
+}
+
+repo_superproject_path() {
+  local repo="$1"
+  local dir superproject_dir
+
+  dir="$(repo_dir "$repo")" || return 1
+  superproject_dir="$(repo_superproject_dir "$repo")" || return 1
+  realpath --relative-to="$superproject_dir" "$dir"
 }

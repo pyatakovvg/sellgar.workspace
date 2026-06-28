@@ -17,12 +17,13 @@ git submodule sync --recursive
 
 sync_submodule_local() {
   local repo="$1"
-  local dir rel_path branch
+  local dir superproject_dir superproject_path branch
   dir="$(repo_dir "$repo")"
-  rel_path="$(repo_path "$repo")"
+  superproject_dir="$(repo_superproject_dir "$repo")"
+  superproject_path="$(repo_superproject_path "$repo")"
 
   if ! git -C "$dir" rev-parse --git-dir >/dev/null 2>&1; then
-    git submodule update --init --recursive -- "$rel_path"
+    git -C "$superproject_dir" submodule update --init --recursive -- "$superproject_path"
   fi
 
   if ! git -C "$dir" rev-parse --git-dir >/dev/null 2>&1; then

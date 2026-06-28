@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Использование: ./agent/scripts/health-check.sh [full|backend|frontend|admin-gateway|identity|product|file|media|admin-ui|media-infra]
+Использование: ./agent/scripts/health-check.sh [full|backend|frontend|admin-gateway|identity|product|store|shop|file|media|admin-ui|media-infra]
 
 Профили:
   full            Проверить backend и admin UI endpoints.
@@ -12,6 +12,8 @@ usage() {
   admin-gateway   Проверить admin gateway.
   identity        Напомнить, что identity service RMQ-only и не имеет HTTP health.
   product         Напомнить, что product service RMQ-only и не имеет HTTP health.
+  store           Напомнить, что store service RMQ-only и не имеет HTTP health.
+  shop            Напомнить, что shop service RMQ-only и не имеет HTTP health.
   file            Проверить file service.
   media           Проверить media service.
   admin-ui        Проверить admin UI.
@@ -67,6 +69,17 @@ probe_product() {
   echo "  verify by service logs and product scenario through admin-gateway/admin-ui"
 }
 
+probe_store() {
+  echo "[skip] store: RMQ-only service, HTTP health endpoint is not available"
+  echo "  verify by service logs and store scenario through admin-gateway/admin-ui"
+  echo "  for event flow, check store_srv.inbox_event, variant_snapshot and sync_issue"
+}
+
+probe_shop() {
+  echo "[skip] shop: RMQ-only service, HTTP health endpoint is not available"
+  echo "  verify by service logs and shop scenario through admin-gateway/admin-ui"
+}
+
 probe_file() {
   probe_any "file" \
     "$FILE_BASE_URL/health" \
@@ -100,6 +113,8 @@ case "$profile" in
     probe_admin_gateway
     probe_identity
     probe_product
+    probe_store
+    probe_shop
     probe_file
     probe_media
     probe_admin_ui
@@ -108,6 +123,8 @@ case "$profile" in
     probe_admin_gateway
     probe_identity
     probe_product
+    probe_store
+    probe_shop
     probe_file
     probe_media
     ;;
@@ -122,6 +139,12 @@ case "$profile" in
     ;;
   product)
     probe_product
+    ;;
+  store)
+    probe_store
+    ;;
+  shop)
+    probe_shop
     ;;
   file)
     probe_file
