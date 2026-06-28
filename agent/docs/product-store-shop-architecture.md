@@ -201,6 +201,30 @@ shop.deleted
 
 `store_srv` - источник истины для продажи каталожных товаров в конкретном магазине.
 
+Базовая терминология:
+
+- `product` - каталожное описание товара. Источник истины: `product_srv`.
+- `variant` - конкретная конфигурация товара внутри `product`. Источник истины: `product_srv`.
+- `shop` - магазин/витрина/канал продажи. Источник истины: `shop_srv`.
+- `store_product` - факт, что конкретный `shop` продает конкретный `product`.
+- `store_offer` / текущая таблица `store_variant_offer` - продажное предложение конкретного
+  `variant` внутри конкретного `store_product`.
+- `price_history` - история цены `store_offer`.
+- `inventory` - остаток и резерв `store_offer`.
+
+Ключевая формула модели:
+
+```text
+Product -> Variant
+Shop + Product -> StoreProduct
+StoreProduct + Variant -> Offer
+Offer -> PriceHistory
+Offer -> Inventory
+```
+
+`Offer` не является nullable-добавкой к `variant`. Если вариант еще не продается в магазине, для
+него просто нет `offer`. Если `offer` существует, он обязан ссылаться на конкретный `variant`.
+
 Целевые таблицы владельца:
 
 ```text
@@ -221,7 +245,7 @@ store_variant_offer
   uuid pk
   version
   store_product_uuid fk -> store_product.uuid
-  variant_uuid external id -> product_srv.variant.uuid
+  variant_uuid fk -> variant_snapshot.variant_uuid
   sku
   article
   title_override nullable
@@ -261,7 +285,7 @@ reservation
   updated_at
 ```
 
-Внешние ссылки в `store_srv`:
+Межсервисные ссылки в `store_srv`:
 
 ```text
 store_product.shop_uuid
@@ -269,7 +293,33 @@ store_product.product_uuid
 store_variant_offer.variant_uuid
 ```
 
-Это не SQL FK. Для них нужны indexes, validation и snapshots.
+Между разными базами SQL FK нет: `store_product.shop_uuid` не может ссылаться напрямую на
+`shop_srv.shop.uuid`, а `store_product.product_uuid` не может ссылаться напрямую на
+`product_srv.product.uuid`.
+
+Внутри своей базы `store_srv` обязан усиливать целостность через локальные ref/snapshot таблицы:
+
+```text
+store_variant_offer.variant_uuid fk -> variant_snapshot.variant_uuid
+unique(store_variant_offer.store_product_uuid, store_variant_offer.variant_uuid)
+```
+
+Эти constraints означают:
+
+- offer не может существовать без известного `variant`;
+- один и тот же `variant` не может быть дважды выставлен в продажу внутри одного
+  `store_product`;
+- `variant_snapshot` не становится источником истины для варианта, но является локальным
+  предохранителем целостности в `store_srv`.
+
+Дополнительный доменный invariant, который проверяет сервис в транзакции:
+
+```text
+variant_snapshot.product_uuid == store_product.product_uuid
+```
+
+Так база гарантирует существование локальной ссылки, а сервис гарантирует, что offer относится к
+варианту именно того product, который продает данный `store_product`.
 
 Локальные read-model/snapshot таблицы:
 
