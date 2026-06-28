@@ -227,6 +227,104 @@ Offer -> InventoryMovement
 `Offer` не является nullable-добавкой к `variant`. Если вариант еще не продается в магазине, для
 него просто нет `offer`. Если `offer` существует, он обязан ссылаться на конкретный `variant`.
 
+## Admin Gateway Read Model
+
+`store_srv` может хранить локальные `shop_snapshot`, `product_snapshot`, `variant_snapshot` только
+как внутренний механизм консистентности команд и событий. Эти таблицы не являются публичной
+моделью и не должны протекать во frontend.
+
+Для admin frontend публичный `StoreProduct` собирается в `sellgar.admin.gateway`:
+
+- коммерческие поля `store_product`, `store_offer`, `price_history`, `offer_inventory` берутся из
+  `store_srv`;
+- `shop` берется из `shop_srv`;
+- `product`, `brand`, `category`, `variant`, `variant.properties`, `variant.images` берутся из
+  `product_srv`;
+- `inventory.available` вычисляется как `quantity - reserved`;
+- `product.images` не существует в текущем catalog contract и не должно появляться в BFF-модели.
+  Изображения принадлежат варианту: `offer.variant.images`.
+
+Целевая форма JSON для frontend:
+
+```json
+{
+  "uuid": "store-product-uuid",
+  "version": 4,
+  "status": "active",
+  "showing": true,
+  "article": "TSHIRT-BASE",
+  "createdAt": "2026-06-28T16:10:00.000Z",
+  "updatedAt": "2026-06-28T16:20:00.000Z",
+  "shop": {
+    "uuid": "shop-uuid",
+    "name": "Основной магазин",
+    "status": "active",
+    "createdAt": "2026-06-28T10:00:00.000Z",
+    "updatedAt": "2026-06-28T10:30:00.000Z"
+  },
+  "product": {
+    "uuid": "product-uuid",
+    "name": "Футболка базовая",
+    "status": "active",
+    "brand": {
+      "uuid": "brand-uuid",
+      "name": "Sellgar",
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:30:00.000Z"
+    },
+    "category": {
+      "uuid": "category-uuid",
+      "name": "Одежда",
+      "createdAt": "2026-06-28T10:00:00.000Z",
+      "updatedAt": "2026-06-28T10:30:00.000Z"
+    },
+    "createdAt": "2026-06-28T10:00:00.000Z",
+    "updatedAt": "2026-06-28T10:30:00.000Z"
+  },
+  "offers": [
+    {
+      "uuid": "offer-uuid",
+      "version": 3,
+      "status": "active",
+      "showing": true,
+      "article": "TSHIRT-BLACK-M",
+      "createdAt": "2026-06-28T16:10:00.000Z",
+      "updatedAt": "2026-06-28T16:20:00.000Z",
+      "variant": {
+        "uuid": "variant-uuid",
+        "name": "Размер M / черный",
+        "status": "active",
+        "properties": [],
+        "images": [],
+        "createdAt": "2026-06-28T10:00:00.000Z",
+        "updatedAt": "2026-06-28T10:30:00.000Z"
+      },
+      "prices": [],
+      "currentPrice": {
+        "uuid": "price-uuid",
+        "value": "1299.90",
+        "currency": {
+          "code": "RUB",
+          "value": "руб."
+        },
+        "startsAt": "2026-06-28T16:10:00.000Z",
+        "endsAt": null,
+        "reason": null,
+        "createdAt": "2026-06-28T16:10:00.000Z"
+      },
+      "inventory": {
+        "uuid": "inventory-uuid",
+        "quantity": 9,
+        "reserved": 2,
+        "available": 7,
+        "version": 6,
+        "updatedAt": "2026-06-28T16:20:00.000Z"
+      }
+    }
+  ]
+}
+```
+
 Целевые таблицы владельца:
 
 ```text
@@ -236,8 +334,6 @@ store_product
   shop_uuid external id -> shop_srv.shop.uuid
   product_uuid external id -> product_srv.product.uuid
   article
-  title_override nullable
-  description_override nullable
   status
   showing
   created_at
@@ -249,10 +345,7 @@ store_offer
   store_product_uuid
   product_uuid
   variant_uuid
-  sku
   article
-  title_override nullable
-  description_override nullable
   status
   showing
   created_at
