@@ -207,8 +207,8 @@ shop.deleted
 - `variant` - конкретная конфигурация товара внутри `product`. Источник истины: `product_srv`.
 - `shop` - магазин/витрина/канал продажи. Источник истины: `shop_srv`.
 - `store_product` - факт, что конкретный `shop` продает конкретный `product`.
-- `store_offer` / текущая таблица `store_variant_offer` - продажное предложение конкретного
-  `variant` внутри конкретного `store_product`.
+- `store_offer` - продажное предложение конкретного `variant` внутри конкретного
+  `store_product`.
 - `price_history` - история цены `store_offer`.
 - `inventory` - остаток и резерв `store_offer`.
 
@@ -241,11 +241,12 @@ store_product
   created_at
   updated_at
 
-store_variant_offer
+store_offer
   uuid pk
   version
-  store_product_uuid fk -> store_product.uuid
-  variant_uuid fk -> variant_snapshot.variant_uuid
+  store_product_uuid
+  product_uuid
+  variant_uuid
   sku
   article
   title_override nullable
@@ -257,8 +258,8 @@ store_variant_offer
 
 price_history
   uuid pk
-  offer_uuid fk -> store_variant_offer.uuid
-  value
+  offer_uuid fk -> store_offer.uuid
+  value numeric(12,2)
   currency_code
   starts_at
   ends_at nullable
@@ -267,7 +268,7 @@ price_history
 
 inventory
   uuid pk
-  offer_uuid fk -> store_variant_offer.uuid
+  offer_uuid fk -> store_offer.uuid
   quantity
   reserved
   version
@@ -275,7 +276,7 @@ inventory
 
 reservation
   uuid pk
-  offer_uuid fk -> store_variant_offer.uuid
+  offer_uuid fk -> store_offer.uuid
   quantity
   status
   source_type
@@ -285,12 +286,20 @@ reservation
   updated_at
 ```
 
+Деньги в `store_srv`:
+
+- в PostgreSQL цена хранится как `numeric(12,2)`;
+- в TypeScript DTO/entity цена представлена строкой, например `"1299.90"`;
+- `double precision`, `float` и TypeORM transformer в `number` для денег не используются;
+- сервис нормализует входящее значение цены до двух знаков перед записью в `price_history`.
+
 Межсервисные ссылки в `store_srv`:
 
 ```text
 store_product.shop_uuid
 store_product.product_uuid
-store_variant_offer.variant_uuid
+store_offer.product_uuid
+store_offer.variant_uuid
 ```
 
 Между разными базами SQL FK нет: `store_product.shop_uuid` не может ссылаться напрямую на
@@ -300,19 +309,24 @@ store_variant_offer.variant_uuid
 Внутри своей базы `store_srv` обязан усиливать целостность через локальные ref/snapshot таблицы:
 
 ```text
-store_variant_offer.variant_uuid fk -> variant_snapshot.variant_uuid
-unique(store_variant_offer.store_product_uuid, store_variant_offer.variant_uuid)
+store_product(uuid, product_uuid) unique
+variant_snapshot(product_uuid, variant_uuid) unique
+store_offer(store_product_uuid, product_uuid) fk -> store_product(uuid, product_uuid)
+store_offer(variant_uuid, product_uuid) fk -> variant_snapshot(variant_uuid, product_uuid)
+unique(store_offer.store_product_uuid, store_offer.variant_uuid)
 ```
 
 Эти constraints означают:
 
 - offer не может существовать без известного `variant`;
+- offer не может ссылаться на `variant` другого `product`;
 - один и тот же `variant` не может быть дважды выставлен в продажу внутри одного
   `store_product`;
 - `variant_snapshot` не становится источником истины для варианта, но является локальным
   предохранителем целостности в `store_srv`.
 
-Дополнительный доменный invariant, который проверяет сервис в транзакции:
+Сервис дополнительно проверяет этот invariant в транзакции до записи, чтобы вернуть
+понятную доменную ошибку, но финальная защита должна оставаться в SQL constraints:
 
 ```text
 variant_snapshot.product_uuid == store_product.product_uuid
@@ -596,7 +610,7 @@ createStoreProduct(commandId, shopUuid, productUuid, variantUuids)
    - every variant exists, active and belongs to product
 5. In one local transaction:
    - insert store_product
-   - insert store_variant_offer rows
+   - insert store_offer rows
    - insert command_request result
    - insert outbox_event
 6. Return created aggregate.
@@ -613,7 +627,7 @@ updateStoreProduct(commandId, storeProductUuid, expectedVersion, patch)
 4. Validate changed shop/product/variant ids through snapshots.
 5. In one local transaction:
    - update store_product version = version + 1
-   - upsert/archive store_variant_offer rows
+   - upsert/archive store_offer rows
    - if price changed, insert a new price_history row
    - if inventory changed, update inventory version = version + 1
    - insert command_request result
@@ -670,7 +684,7 @@ Snapshots не являются source of truth. Они нужны для лок
 
 ```text
 store_product
-  + store_variant_offer[]
+  + store_offer[]
   + current price per offer
   + inventory per offer
   + product_snapshot
@@ -695,7 +709,7 @@ store_product
 cart_srv
   cart
   cart_item
-  offer_uuid external id -> store_srv.store_variant_offer.uuid
+  offer_uuid external id -> store_srv.store_offer.uuid
   quantity
   observed_price_value
   observed_price_uuid
@@ -739,7 +753,7 @@ cart -> order draft -> inventory reserve -> payment -> order confirm -> reservat
 | `unit` | `product_srv` | оставить |
 | `image` | `product_srv` | оставить как projection из `file_srv` |
 | `shop` | `shop_srv` | перенести и расширять отдельно |
-| `store` | `store_srv` | не переносить один-в-один; заменить на `store_product` + `store_variant_offer` |
+| `store` | `store_srv` | не переносить один-в-один; заменить на `store_product` + `store_offer` |
 | `price` | `store_srv` | заменить на `price_history` с привязкой к offer |
 | `cart` | future `cart_srv` | не развивать в `product_srv` и не переносить в `store_srv` |
 | `order` | future `order_srv` | не развивать в `product_srv` и не переносить в `store_srv` |
@@ -751,7 +765,7 @@ cart -> order draft -> inventory reserve -> payment -> order confirm -> reservat
 1. Добавить TypeORM подключение в `shop_srv` и `store_srv`.
 2. Создать минимальную модель `shop` в `shop_srv`.
 3. Создать `shop_snapshot`, `product_snapshot`, `variant_snapshot` в `store_srv`.
-4. Добавить `store_product`, `store_variant_offer`, `price_history`, `inventory`.
+4. Добавить `store_product`, `store_offer`, `price_history`, `inventory`.
 5. Добавить outbox/inbox skeleton и idempotent command table.
 6. Подключить события/sync для `shop` и `product/variant`.
 7. Добавить новые command patterns для `store_srv`.
