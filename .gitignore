@@ -1,6 +1,5 @@
 # IDEs and editors
 .idea
 .DS_Store
-.agents
 .codex
 .playwright-mcp
