@@ -74,6 +74,13 @@ variant
   created_at
   updated_at
 
+product_property
+  uuid pk
+  product_uuid fk -> product.uuid
+  property_uuid fk -> property.uuid
+  value
+  order
+
 variant_property
   uuid pk
   variant_uuid fk -> variant.uuid
@@ -96,6 +103,14 @@ property
 unit
 image
 ```
+
+Свойства товара делятся на два уровня:
+
+- `product_property` хранит общие свойства, одинаковые для всех вариантов товара;
+- `variant_property` хранит свойства, которые различают варианты;
+- один `property_uuid` не может одновременно присутствовать в `product_property` товара и
+  `variant_property` любого его варианта. Если свойство отличается по вариантам, оно должно
+  храниться только на уровне вариантов.
 
 `currency` для pricing живет в `store_srv` как предзаполненный локальный справочник. Таблица валют
 не является частью каталога: catalog product/variant не должен владеть ценой или валютой продажи.
@@ -238,7 +253,7 @@ Offer -> InventoryMovement
 - коммерческие поля `store_product`, `store_offer`, `price_history`, `offer_inventory` берутся из
   `store_srv`;
 - `shop` берется из `shop_srv`;
-- `product`, `brand`, `category`, `variant`, `variant.properties`, `variant.images` берутся из
+- `product`, `product.properties`, `brand`, `category`, `variant`, `variant.properties`, `variant.images` берутся из
   `product_srv`;
 - `inventory.available` вычисляется как `quantity - reserved`;
 - `product.images` не существует в текущем catalog contract и не должно появляться в BFF-модели.
@@ -278,6 +293,7 @@ Offer -> InventoryMovement
       "createdAt": "2026-06-28T10:00:00.000Z",
       "updatedAt": "2026-06-28T10:30:00.000Z"
     },
+    "properties": [],
     "createdAt": "2026-06-28T10:00:00.000Z",
     "updatedAt": "2026-06-28T10:30:00.000Z"
   },
