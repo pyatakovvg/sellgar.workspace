@@ -24,6 +24,7 @@
 | Agent task scope, реализация, closeout | [agent/task-contract.md](agent/task-contract.md) | [agent/closeout-gates.md](agent/closeout-gates.md) |
 | Submodules, detached state, sync с `origin/master` | [submodules-workflow.md](submodules-workflow.md) | `./agent/scripts/status-all.sh` |
 | Локальный запуск, health-check, dev services | [dev-modes.md](dev-modes.md) | [dev-command-matrix.md](dev-command-matrix.md) |
+| Frontend-документация, правила разработки | [../frontend/README.md](../frontend/README.md) | тематический документ из `agent/frontend` |
 | Product/Store/Shop архитектура, цены, остатки | [product-store-shop-architecture.md](product-store-shop-architecture.md) | affected service `AGENTS.md` |
 | Admin gateway | `backend/gateway/sellgar.admin.gateway/AGENTS.md` | build/run/smoke из [dev-command-matrix.md](dev-command-matrix.md) |
 | Identity service | `backend/service/sellgar.identity.service/AGENTS.md` | build/run/smoke из [dev-command-matrix.md](dev-command-matrix.md) |
@@ -66,6 +67,7 @@ Mobile:
 - [submodules-workflow.md](submodules-workflow.md) - работать с gitlinks и `master`.
 - [dev-command-matrix.md](dev-command-matrix.md) - не восстанавливать команды заново в каждой сессии.
 - [dev-modes.md](dev-modes.md) - выбирать режим локального запуска.
+- [../frontend/README.md](../frontend/README.md) - индекс frontend-документации.
 
 ## Engineering Harness Checks
 
