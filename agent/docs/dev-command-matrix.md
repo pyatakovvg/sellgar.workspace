@@ -31,6 +31,24 @@ yarn start:dev
 
 Ожидаемый локальный порт: `4020`.
 
+### Client Gateway
+
+Рабочая директория:
+
+```bash
+cd backend/gateway/sellgar.client.gateway
+```
+
+Команды:
+
+```bash
+yarn build
+yarn start:dev
+```
+
+Ожидаемый локальный порт: `4030`. Минимальный health endpoint:
+`GET http://localhost:4030/health`.
+
 ### Identity Service
 
 Рабочая директория:
