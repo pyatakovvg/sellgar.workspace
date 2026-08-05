@@ -1,0 +1,58 @@
+{
+  "private": true,
+  "name": "@service/ai-chat",
+  "version": "0.0.1",
+  "description": "Canonical backend for AI Analytics Assistant chats",
+  "license": "UNLICENSED",
+  "packageManager": "yarn@4.10.3",
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main",
+    "test": "jest",
+    "test:e2e": "jest --config ./test/jest-e2e.json"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.1.27",
+    "@nestjs/config": "4.0.4",
+    "@nestjs/core": "11.1.27",
+    "@nestjs/platform-express": "11.1.27",
+    "@nestjs/typeorm": "11.0.3",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.15.1",
+    "pg": "8.22.0",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "socket.io": "4.8.3",
+    "typeorm": "1.0.0"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "11.0.23",
+    "@nestjs/testing": "11.1.27",
+    "@types/jest": "30.0.0",
+    "@types/node": "26.0.1",
+    "@types/supertest": "6.0.3",
+    "jest": "30.4.2",
+    "source-map-support": "0.5.21",
+    "supertest": "7.2.2",
+    "ts-jest": "29.4.11",
+    "ts-loader": "9.6.2",
+    "ts-node": "10.9.2",
+    "tsconfig-paths": "4.2.0",
+    "typescript": "6.0.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "testEnvironment": "node"
+  }
+}
