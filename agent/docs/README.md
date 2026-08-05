@@ -35,7 +35,7 @@
 | File service | `backend/service/sellgar.file.service/AGENTS.md` | file metadata API smoke |
 | Media service | `backend/service/sellgar.media.service/AGENTS.md` | media upload/CDN/MinIO smoke |
 | Admin frontend | `frontend/sellgar.ui.admin/AGENTS.md` | browser/manual smoke + frontend build |
-| UI kit | `frontend/sellgar.ui.kit/AGENTS.md` | storybook/build checks |
+| UI kit | `frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md` | storybook/build checks |
 | Desktop UI | nearest `AGENTS.md`, если появится | package-local build/run |
 | Mobile app | nearest `AGENTS.md`, если появится | package-local build/run |
 
@@ -55,7 +55,7 @@ Backend:
 Frontend:
 
 - `frontend/sellgar.ui.admin/AGENTS.md`
-- `frontend/sellgar.ui.kit/AGENTS.md`
+- `frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md`
 - `frontend/sellgar.ui.desktop/AGENTS.md`, если будет добавлен
 
 Mobile:

@@ -69,7 +69,7 @@ scope:
 
 ## UI Правила
 
-- Используй `@tiyn/app` module/frame/controller patterns, уже принятые в repo.
+- Используй `@sellgar/app` module/frame/controller patterns, уже принятые в repo.
 - Используй `@sellgar/kit` components и `@sellgar/kit/icons`; не заменяй их ad hoc widgets, когда kit API подходит.
 - При правках repo docs держи документацию и agent prose на русском.
 - Для route/frame behavior проверяй реальный browser path, когда он доступен.

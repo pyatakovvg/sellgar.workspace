@@ -17,8 +17,10 @@ REPOS=(
   "sellgar.file.service"
   "sellgar.media.service"
   "sellgar.ui.admin"
-  "sellgar.ui.kit"
+  "sellgar.kit.ui"
   "sellgar.ui.desktop"
+  "sellgar.orm.ui"
+  "sellgar.app.ui"
   "sellgar.mobile"
 )
 
@@ -33,8 +35,10 @@ CLONE_REPOS=(
   "sellgar.file.service"
   "sellgar.media.service"
   "sellgar.ui.admin"
-  "sellgar.ui.kit"
+  "sellgar.kit.ui"
   "sellgar.ui.desktop"
+  "sellgar.orm.ui"
+  "sellgar.app.ui"
   "sellgar.mobile"
 )
 
@@ -75,11 +79,17 @@ repo_dir() {
     sellgar.ui.admin)
       printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin"
       ;;
-    sellgar.ui.kit)
-      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.kit"
+    sellgar.kit.ui)
+      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin/library/sellgar.kit.ui"
       ;;
     sellgar.ui.desktop)
       printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.desktop"
+      ;;
+    sellgar.orm.ui)
+      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin/library/sellgar.orm.ui"
+      ;;
+    sellgar.app.ui)
+      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin/library/sellgar.app.ui"
       ;;
     sellgar.mobile)
       printf '%s\n' "$WORKSPACE_DIR/mobile/sellgar.mobile"
@@ -103,6 +113,9 @@ repo_superproject_dir() {
   case "$repo" in
     sellgar.outbox.library)
       repo_dir "sellgar.product.service"
+      ;;
+    sellgar.kit.ui|sellgar.orm.ui|sellgar.app.ui)
+      repo_dir "sellgar.ui.admin"
       ;;
     *)
       printf '%s\n' "$WORKSPACE_DIR"

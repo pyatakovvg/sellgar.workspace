@@ -6,7 +6,7 @@ title: Sellgar UI Kit Component
 summary: Работа с компонентами и Storybook в Sellgar UI kit.
 triggers:
   - UI kit
-  - frontend/sellgar.ui.kit
+  - frontend/sellgar.ui.admin/library/sellgar.kit.ui
   - "@sellgar/kit"
   - component
   - controls
@@ -28,7 +28,7 @@ name: sellgar-ui-kit-component
 description: Помогает работать с Sellgar UI kit components, @sellgar/kit, controls, overlays, icons, Storybook, public API и generated icons.
 triggers:
   - UI kit
-  - frontend/sellgar.ui.kit
+  - frontend/sellgar.ui.admin/library/sellgar.kit.ui
   - "@sellgar/kit"
   - component
   - controls
@@ -41,14 +41,14 @@ scope:
   workspace: /home/sellgar/projects/my/sellgar.workspace
 ```
 
-Используй этот skill перед правками в `frontend/sellgar.ui.kit`.
+Используй этот skill перед правками в `frontend/sellgar.ui.admin/library/sellgar.kit.ui`.
 
 ## Обязательное Чтение
 
 Читай:
 
 - workspace `agent/docs/README.md`, если стартуешь из `sellgar.workspace`;
-- `frontend/sellgar.ui.kit/AGENTS.md`;
+- `frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md`;
 - ближайший component/package `AGENTS.md` внутри `library/kit/src`;
 - `DOMAIN.md`, если он есть для complex components вроде formatted input или table.
 
@@ -63,7 +63,7 @@ scope:
 
 ## Проверка
 
-Используй команды из `frontend/sellgar.ui.kit/AGENTS.md` и package scripts:
+Используй команды из `frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md` и package scripts:
 
 ```bash
 yarn kit:build

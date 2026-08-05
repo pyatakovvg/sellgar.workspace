@@ -29,9 +29,11 @@ git submodule update --init --recursive
 Если после sync изменились gitlinks, коммить их отдельно:
 
 ```bash
-git add backend/gateway/sellgar.admin.gateway backend/gateway/sellgar.client.gateway backend/service/sellgar.identity.service backend/service/sellgar.product.service backend/service/sellgar.store.service backend/service/sellgar.shop.service backend/service/sellgar.file.service backend/service/sellgar.media.service frontend/sellgar.ui.admin frontend/sellgar.ui.kit frontend/sellgar.ui.desktop mobile/sellgar.mobile
+git add backend/gateway/sellgar.admin.gateway backend/gateway/sellgar.client.gateway backend/service/sellgar.identity.service backend/service/sellgar.product.service backend/service/sellgar.store.service backend/service/sellgar.shop.service backend/service/sellgar.file.service backend/service/sellgar.media.service frontend/sellgar.ui.admin frontend/sellgar.ui.desktop mobile/sellgar.mobile
 git commit -m "chore: update sellgar submodules"
 ```
+
+`sellgar.kit.ui`, `sellgar.orm.ui` и `sellgar.app.ui` являются nested submodules репозитория `sellgar.ui.admin`. Сначала коммить изменения nested library в её repository, затем gitlink в admin UI и только после этого workspace pointer admin UI.
 
 Не встраивай auto-update submodules в scripts запуска приложений. Запуск приложения не должен незаметно менять код.
 

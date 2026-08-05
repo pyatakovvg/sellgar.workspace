@@ -177,7 +177,7 @@ yarn dev:admin_ui
 Рабочая директория:
 
 ```bash
-cd frontend/sellgar.ui.kit
+cd frontend/sellgar.ui.admin/library/sellgar.kit.ui
 ```
 
 Команды зависят от package scripts. Перед запуском проверь:
