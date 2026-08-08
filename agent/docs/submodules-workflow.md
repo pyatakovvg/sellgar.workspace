@@ -29,7 +29,7 @@ git submodule update --init --recursive
 Если после sync изменились gitlinks, коммить их отдельно:
 
 ```bash
-git add backend/gateway/sellgar.admin.gateway backend/gateway/sellgar.client.gateway backend/service/sellgar.identity.service backend/service/sellgar.product.service backend/service/sellgar.store.service backend/service/sellgar.shop.service backend/service/sellgar.file.service backend/service/sellgar.media.service frontend/sellgar.ui.admin frontend/sellgar.ui.desktop mobile/sellgar.mobile
+git add backend/gateway/sellgar.admin.gateway backend/gateway/sellgar.client.gateway backend/gateway/sellgar.socket.gateway backend/service/sellgar.identity.service backend/service/sellgar.product.service backend/service/sellgar.store.service backend/service/sellgar.shop.service backend/service/sellgar.file.service backend/service/sellgar.media.service frontend/sellgar.ui.admin frontend/sellgar.ui.desktop mobile/sellgar.mobile
 git commit -m "chore: update sellgar submodules"
 ```
 

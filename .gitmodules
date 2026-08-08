@@ -42,3 +42,7 @@
 	path = backend/service/sellgar.shop.service
 	url = git@github.com:pyatakovvg/sellgar.shop.service.git
 	branch = master
+[submodule "backend/gateway/sellgar.socket.gateway"]
+	path = backend/gateway/sellgar.socket.gateway
+	url = git@github.com:pyatakovvg/sellgar.socket.gateway.git
+	branch = master

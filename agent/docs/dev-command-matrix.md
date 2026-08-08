@@ -49,6 +49,27 @@ yarn start:dev
 Ожидаемый локальный порт: `4030`. Минимальный health endpoint:
 `GET http://localhost:4030/health`.
 
+### Socket Gateway
+
+Рабочая директория:
+
+```bash
+cd backend/gateway/sellgar.socket.gateway
+```
+
+Команды:
+
+```bash
+yarn build
+yarn test --runInBand
+yarn start:dev
+```
+
+Ожидаемый локальный порт: `4040`. Минимальный health endpoint:
+`GET http://localhost:4040/health`. Runtime socket/RMQ smoke требует запущенный
+RabbitMQ, валидный short-lived socket ticket и подключение к namespace
+`/realtime` только через WebSocket transport.
+
 ### Identity Service
 
 Рабочая директория:

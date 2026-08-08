@@ -3,13 +3,14 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Использование: ./agent/scripts/health-check.sh [full|backend|frontend|admin-gateway|identity|product|store|shop|file|media|admin-ui|media-infra]
+Использование: ./agent/scripts/health-check.sh [full|backend|frontend|admin-gateway|socket-gateway|identity|product|store|shop|file|media|admin-ui|media-infra]
 
 Профили:
   full            Проверить backend и admin UI endpoints.
   backend         Проверить gateway/services endpoints.
   frontend        Проверить admin UI dev server.
   admin-gateway   Проверить admin gateway.
+  socket-gateway  Проверить socket gateway.
   identity        Напомнить, что identity service RMQ-only и не имеет HTTP health.
   product         Напомнить, что product service RMQ-only и не имеет HTTP health.
   store           Напомнить, что store service RMQ-only и не имеет HTTP health.
@@ -29,6 +30,7 @@ if [ "$profile" = "-h" ] || [ "$profile" = "--help" ]; then
 fi
 
 ADMIN_GATEWAY_BASE_URL="${ADMIN_GATEWAY_BASE_URL:-http://localhost:4020}"
+SOCKET_GATEWAY_BASE_URL="${SOCKET_GATEWAY_BASE_URL:-http://localhost:4040}"
 FILE_BASE_URL="${FILE_BASE_URL:-http://localhost:5040}"
 MEDIA_BASE_URL="${MEDIA_BASE_URL:-http://localhost:5050}"
 ADMIN_UI_BASE_URL="${ADMIN_UI_BASE_URL:-http://localhost:3000}"
@@ -57,6 +59,11 @@ probe_admin_gateway() {
     "$ADMIN_GATEWAY_BASE_URL/health" \
     "$ADMIN_GATEWAY_BASE_URL/healthz" \
     "$ADMIN_GATEWAY_BASE_URL/api/health" || failed=1
+}
+
+probe_socket_gateway() {
+  probe_any "socket-gateway" \
+    "$SOCKET_GATEWAY_BASE_URL/health" || failed=1
 }
 
 probe_identity() {
@@ -111,6 +118,7 @@ probe_media_infra() {
 case "$profile" in
   full)
     probe_admin_gateway
+    probe_socket_gateway
     probe_identity
     probe_product
     probe_store
@@ -121,6 +129,7 @@ case "$profile" in
     ;;
   backend)
     probe_admin_gateway
+    probe_socket_gateway
     probe_identity
     probe_product
     probe_store
@@ -133,6 +142,9 @@ case "$profile" in
     ;;
   admin-gateway)
     probe_admin_gateway
+    ;;
+  socket-gateway)
+    probe_socket_gateway
     ;;
   identity)
     probe_identity
