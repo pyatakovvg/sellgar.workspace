@@ -115,6 +115,24 @@ import * as FV from './form-values.ts';
 Named imports допустимы для JSX-компонентов, типов, entities, value objects и
 явных contract tokens. Они не должны делать чтение компонента мутным.
 
+Для `@sellgar/kit` React-компоненты импортируй именованно, а hooks, helpers и
+другой behavior API вызывай через namespace `Kit`. Если в одном файле нужны
+оба вида API, используй две import-декларации: синтаксис, объединяющий namespace
+и named imports в одной декларации, не существует.
+
+```tsx
+import * as Kit from '@sellgar/kit';
+import { Typography } from '@sellgar/kit';
+
+const { data } = Kit.useCellData<Entity>();
+
+return (
+  <Typography>
+    <p>{data.name}</p>
+  </Typography>
+);
+```
+
 Если library export используется как JSX-component, но принадлежит API
 behavior-library, он тоже остается за namespace:
 

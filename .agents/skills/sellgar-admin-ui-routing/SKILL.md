@@ -1,47 +1,9 @@
 ---
 name: sellgar-admin-ui-routing
 description: Маршрутизирует Sellgar admin frontend изменения в pages, frames, widgets, layouts, library/design, library/domain, tiyn-app runtime, routes и hash frames.
-id: sellgar-admin-ui-routing
-title: Sellgar Admin UI Routing
-summary: Маршрутизация изменений в Sellgar admin frontend.
-triggers:
-  - admin UI
-  - frontend/sellgar.ui.admin
-  - pages
-  - frames
-  - widgets
-  - layouts
-  - library/design
-  - library/domain
-  - tiyn-app
-  - hash frame
-  - browser smoke
-scope:
-  workspace: /home/sellgar/projects/my/sellgar.workspace
 ---
 
 # Маршрутизация Sellgar Admin UI
-
-## Метаданные
-
-```yaml
-name: sellgar-admin-ui-routing
-description: Маршрутизирует Sellgar admin frontend изменения в pages, frames, widgets, layouts, library/design, library/domain, tiyn-app runtime, routes и hash frames.
-triggers:
-  - admin UI
-  - frontend/sellgar.ui.admin
-  - pages
-  - frames
-  - widgets
-  - layouts
-  - library/design
-  - library/domain
-  - tiyn-app
-  - hash frame
-  - browser smoke
-scope:
-  workspace: /home/sellgar/projects/my/sellgar.workspace
-```
 
 Используй этот skill перед правками в `frontend/sellgar.ui.admin`.
 
@@ -66,6 +28,8 @@ scope:
 - Pure helpers: `utils/*`.
 
 Не переносить drawer/modal feature workflows в `widgets`.
+
+После переноса файлов или каталога между слоями удали каждый ставший пустым каталог в исходном и целевом дереве, включая опустевшую цепочку родителей. Не оставляй каталог только потому, что Git его не отслеживает; перед завершением явно проверь обе затронутые границы на пустые каталоги.
 
 ## UI Правила
 
