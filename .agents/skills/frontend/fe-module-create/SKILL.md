@@ -1,19 +1,23 @@
 ---
 name: fe-module-create
 description: >-
-  Создаёт, изменяет, рефакторит и проверяет framework-единицы на основе
+  Создаёт, изменяет, рефакторит и проверяет frontend framework-единицы на основе
   @sellgar/app: Module, Frame, Widget и Layout; их declarations, controllers,
   loader/action use cases, локальные services и stores, owned DTO/Input/Entity,
   mappers, serializers, bindings, providers, lifecycle и взаимодействие с view.
-  Использовать при разработке или аудите pages, frames, widgets и layouts,
-  выборе владельца бизнес-логики, исправлении прямых запросов из view,
+  Использовать при разработке или аудите frontend pages, frames, widgets и
+  layouts, выборе владельца бизнес-логики, исправлении прямых запросов из view,
   проектировании controller contracts и приведении package к framework-модели.
+  Не использовать для backend, mobile, infrastructure и server-side packages.
 ---
 
 # Framework-Единица `@sellgar/app`
 
 ## Область и приоритет
 
+- Применять этот скилл только к web frontend-коду на основе `@sellgar/app` и к принадлежащим frontend-приложению packages и libraries.
+- Не применять его правила к backend, mobile, infrastructure, server-side runtime и их модулям. Совпадение терминов `Module`, `Controller`, `Service`, `Provider` или `DTO` не расширяет область скилла.
+- В cross-layer задаче проверять и изменять по этому скиллу только frontend-часть. Внешние контракты разрешено читать как контекст; остальные части передавать соответствующему профильному маршруту или скиллу.
 - Считать этот `SKILL.md` главным стандартом framework-единиц. Противоречащие legacy-код и документацию считать объектом исправления.
 - Использовать документацию `@sellgar/app` только для framework-деталей, не определённых здесь. Не читать весь комплект документации без необходимости.
 - Применять общий предметный слой к `Module`, `Frame` и `Widget`. Считать `Layout` ограниченным shell-вариантом по разделу `UNIT`.
