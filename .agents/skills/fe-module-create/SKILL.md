@@ -59,7 +59,6 @@ src/
     classes.bindings.ts
     <role>/
       <owner>/
-        index.ts
         __test__/
         domain/
         dto/
@@ -93,7 +92,7 @@ src/
 ```
 
 - **SRC-2.** Называть declaration `{name}.module.tsx`, `{name}.frame.tsx`, `{name}.widget.tsx` или `{name}.layout.tsx`. Называть главный view строго `module.view.tsx`, `frame.view.tsx`, `widget.view.tsx` или `layout.view.tsx`.
-- **SRC-3.** Считать `src/index.ts` единственным package facade. Не создавать агрегирующие `index.ts` непосредственно в `classes/`, `providers/`, `view/`, `components/`, `hooks/` и `constants/`. Создавать локальный `index.ts` у конкретного владельца: `controller/product`, `providers/preload`, `components/fallback`, `view/header` и аналогичных owner-каталогов.
+- **SRC-3.** Считать `src/index.ts` единственным package facade. Не создавать агрегирующие `index.ts` непосредственно в `classes/`, `providers/`, `view/`, `components/`, `hooks/` и `constants/`. Не создавать фасады ни на одном уровне внутри `classes/`, включая `controller/<owner>`, `service/<owner>`, `store/<owner>` и их `domain`, `dto`, `input`, `mapper`, `serializer`: импортировать конкретные файлы напрямую. Создавать локальный `index.ts` только у presentation и runtime owners, которым нужен локальный компонентный контракт: `providers/preload`, `components/fallback`, `view/header` и аналогичных owner-каталогов.
 - **SRC-4.** Не создавать `src/requests/`. Выполнять HTTP и domain operations из controller или local service через внедрённый port.
 - **SRC-5.** Для Frame расширять общее дерево только необходимыми framework-ролями:
 
@@ -101,7 +100,6 @@ src/
 src/
   classes/
     params/
-      index.ts
       frame.params.ts
   shell/
     index.ts
@@ -169,6 +167,7 @@ classes/
 - **STR-6.** Не создавать optional-каталоги owned-ролей заранее. Запрещать пустые каталоги, неиспользуемые роли и параллельную legacy-структуру.
 - **STR-7.** После переноса или удаления файлов удалять каждый ставший пустым каталог, включая опустевшую цепочку родителей.
 - **STR-8.** Считать `classes/` полностью приватной реализацией framework-единицы. Запрещать deep imports и использование её абстракций другими packages.
+- **STR-9.** Не создавать `index.ts` внутри `classes/` на уровне роли, владельца или owned-роли. Эти каталоги описывают внутреннюю структуру, а не фасады; все внутренние потребители должны импортировать interface, implementation, Input, DTO, Entity, Mapper и Serializer из конкретного файла.
 
 ## CTRL — controller
 
