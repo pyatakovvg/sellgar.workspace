@@ -1,136 +1,104 @@
 ---
 name: sellgar-admin-start
-description: 'Запускает полный dev-контур Sellgar admin по просьбам вроде "запусти админку": нужные Docker/infra зависимости, все backend services в dev mode и frontend/sellgar.ui.admin.'
-id: sellgar-admin-start
-title: Sellgar Admin Start
-summary: Запуск админки Sellgar со всеми нужными dev services.
-triggers:
-  - запусти админку
-  - подними админку
-  - запусти admin UI
-  - подними admin UI
-  - запусти sellgar.ui.admin
-  - sellgar.ui.admin
-  - dev admin
-  - start admin
-scope:
-  workspace: /home/sellgar/projects/my/sellgar.workspace
+description: >-
+  Запускает полный локальный dev-контур Sellgar Admin по запросам «запусти
+  админку», «подними admin UI» или «start admin»: проверяет уже работающие
+  процессы, поднимает media Docker infra, необходимые backend services,
+  gateways и frontend/sellgar.ui.admin в отдельных sessions. Использовать для
+  запуска всего admin stack, а не для диагностики одного endpoint или изменения
+  кода. Health/smoke выполнять дополнительно только по запросу.
 ---
 
-# Sellgar Admin Start
+# Запуск Sellgar Admin
 
-## Метаданные
+## Область и приоритет
 
-```yaml
-name: sellgar-admin-start
-description: 'Запускает полный dev-контур Sellgar admin по просьбам вроде "запусти админку": нужные Docker/infra зависимости, все backend services в dev mode и frontend/sellgar.ui.admin.'
-triggers:
-  - запусти админку
-  - подними админку
-  - запусти admin UI
-  - подними admin UI
-  - запусти sellgar.ui.admin
-  - sellgar.ui.admin
-  - dev admin
-  - start admin
-scope:
-  workspace: /home/sellgar/projects/my/sellgar.workspace
-```
+- Применяй этот скилл только когда пользователь просит запустить полный admin dev-контур.
+- Для точечного service/UI запуска, health-check или bug diagnosis используй `sellgar-dev-runtime`.
+- Перед запуском читай `agent/docs/README.md`, `agent/docs/dev-modes.md`, `agent/docs/dev-command-matrix.md`, `backend/service/sellgar.media.service/AGENTS.md` и `frontend/sellgar.ui.admin/AGENTS.md`.
+- Сверяй каждую команду с актуальным `package.json` и ближайшим `AGENTS.md`; этот скилл задаёт порядок, а не заменяет repo-local source of truth.
+- Запуск не разрешает sync submodules, dependency upgrade, изменение env contracts или очистку данных.
 
-Используй этот skill, когда пользователь просит запустить админку Sellgar, а не проверить конкретный баг.
+## Алгоритм
 
-## Обязательное Чтение
+1. Из workspace root выполни `./agent/scripts/status-all.sh`.
+2. Проверь listening ports, активные dev processes и Docker containers; переиспользуй корректно запущенные компоненты.
+3. Проверь доступность RabbitMQ и media infra ports. Не останавливай существующего владельца порта без установления его назначения.
+4. Подними отсутствующую media infrastructure из `backend/service/sellgar.media.service`.
+5. Запусти отсутствующие backend services и gateways в отдельных долгоживущих sessions.
+6. Дождись startup/readiness logs каждого нового процесса.
+7. Запусти `frontend/sellgar.ui.admin` отдельной session и дождись URL Vite.
+8. Сообщи состояние запуска. Не выполняй полный smoke/health-check, если пользователь просил только запуск.
 
-Перед запуском читай:
+## START — правила запуска
 
-- `agent/docs/README.md`
-- `agent/docs/dev-modes.md`
-- `agent/docs/dev-command-matrix.md`
-- `backend/service/sellgar.media.service/AGENTS.md`
-- `frontend/sellgar.ui.admin/AGENTS.md`
-
-Если команда или локальный контракт расходится с этим skill, текущие workspace docs и ближайший `AGENTS.md` важнее.
-
-## Перед Стартом
-
-Из workspace root проверь состояние рабочих деревьев:
-
-```bash
-./agent/scripts/status-all.sh
-```
-
-Не выполняй smoke/health-check по умолчанию. Пользователь попросил только запуск. `./agent/scripts/health-check.sh full` запускай только если пользователь отдельно попросил проверку.
-
-## Порядок Запуска
-
-Запускай процессы в отдельных долгоживущих терминальных сессиях или эквивалентных background/dev-server sessions. Не объединяй все services в одну команду, потому что каждый `start:dev` должен остаться живым.
-
-1. Подними Docker/infra зависимости media service:
+- **START-1.** Не запускай дубликат уже работающего service только ради единообразия списка.
+- **START-2.** Не объединяй несколько `start:dev` в одну session: каждый процесс должен оставаться наблюдаемым и управляемым отдельно.
+- **START-3.** Поднимай Docker infra командой из media service только после проверки конфликтов ports/containers:
 
 ```bash
 cd backend/service/sellgar.media.service
 docker compose up -d
 ```
 
-2. Запусти backend services в dev mode:
+- **START-4.** Не пересоздавай volumes, не очищай MinIO/CDN cache и не удаляй контейнеры при обычном запуске.
+- **START-5.** Если package manager или dependency отсутствует, не изменяй lockfile и не выполняй upgrade. Сообщи blocker либо используй уже установленный exact package-manager binary.
+- **START-6.** Оставляй успешно запущенные sessions активными после завершения turn, потому что результатом запроса является работающий dev-контур.
 
-```bash
-cd backend/service/sellgar.identity.service
-yarn start:dev
-```
+## Backend services
 
-```bash
-cd backend/service/sellgar.product.service
-yarn start:dev
-```
+Запускай отсутствующие процессы текущими package scripts:
 
-```bash
-cd backend/service/sellgar.store.service
-yarn start:dev
-```
+| Порядок | Рабочая директория                         | Команда                       |
+| ------- | ------------------------------------------ | ----------------------------- |
+| 1       | `backend/service/sellgar.identity.service` | `yarn start:identity_srv.dev` |
+| 2       | `backend/service/sellgar.product.service`  | `yarn dev:product_srv`        |
+| 3       | `backend/service/sellgar.store.service`    | `yarn start:dev`              |
+| 4       | `backend/service/sellgar.shop.service`     | `yarn start:shop_srv.dev`     |
+| 5       | `backend/service/sellgar.file.service`     | `yarn start:file_srv.dev`     |
+| 6       | `backend/service/sellgar.media.service`    | `yarn start:dev`              |
+| 7       | `backend/gateway/sellgar.admin.gateway`    | `yarn start:admin_gw.dev`     |
+| 8       | `backend/gateway/sellgar.socket.gateway`   | `yarn start:dev`              |
 
-```bash
-cd backend/service/sellgar.shop.service
-yarn start:dev
-```
+Не запускай client gateway, desktop или mobile, если пользователь не расширил scope.
 
-```bash
-cd backend/service/sellgar.file.service
-yarn start:dev
-```
+## Admin frontend
 
-```bash
-cd backend/service/sellgar.media.service
-yarn start:dev
-```
-
-```bash
-cd backend/gateway/sellgar.admin.gateway
-yarn start:dev
-```
-
-3. Запусти admin frontend:
+Запускай отсутствующий frontend process:
 
 ```bash
 cd frontend/sellgar.ui.admin
 yarn dev:admin_ui
 ```
 
-## Runtime Notes
+## Expected runtime
 
-- `identity`, `product`, `store` и `shop` могут быть RMQ-only services без HTTP `/health`.
-- Admin gateway ожидается на `http://localhost:4020`.
-- File service ожидается на `http://localhost:5040`.
-- Media service ожидается на `http://localhost:5050`.
-- Admin UI ожидается на `http://localhost:3000`.
-- Media infra поднимает MinIO `9000/9001` и local CDN `8088`.
+| Компонент           | Endpoint                                          |
+| ------------------- | ------------------------------------------------- |
+| Admin UI            | `http://localhost:3000`                           |
+| Admin gateway       | `http://localhost:4020`                           |
+| Socket gateway      | `http://localhost:4040`                           |
+| File service        | `http://localhost:5040`                           |
+| Media service       | `http://localhost:5050`                           |
+| Local CDN           | `http://localhost:8088`                           |
+| MinIO API / console | `http://localhost:9000` / `http://localhost:9001` |
 
-## Финальный Отчет
+`identity`, `product`, `store` и `shop` могут быть RMQ-only и не обязаны иметь HTTP `/health`.
 
-В финале сообщай:
+## VERIFY — готовность
 
-- какие Docker/infra зависимости были подняты;
-- какие dev-server sessions запущены;
-- какие URLs ожидаются;
-- какие команды не запускались и почему;
-- что smoke/health-check не выполнялся, если пользователь не просил проверку.
+- **VERIFY-1.** Для каждого нового process зафиксируй compile/startup result и connection failures.
+- **VERIFY-2.** Для Vite зафиксируй фактический local URL.
+- **VERIFY-3.** Не называй stack smoke-проверенным, если выполнен только startup.
+- **VERIFY-4.** Запускай `./agent/scripts/health-check.sh full` и browser scenario только по отдельному запросу либо когда без них нельзя подтвердить успешный запуск.
+
+## Завершение
+
+Сообщи:
+
+- какие containers и процессы уже работали;
+- какие sessions были запущены;
+- какие endpoints ожидаются;
+- какие компоненты не запустились и почему;
+- выполнялся ли health/smoke;
+- что tracked files не изменялись, либо перечисли неожиданные изменения.

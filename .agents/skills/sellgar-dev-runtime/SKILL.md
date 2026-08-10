@@ -1,84 +1,79 @@
 ---
 name: sellgar-dev-runtime
-description: Запускает и smoke-check локальный Sellgar runtime, backend services, admin UI, media infra, health checks и browser/manual smoke.
-id: sellgar-dev-runtime
-title: Sellgar Dev Runtime
-summary: Запуск локального Sellgar runtime и smoke-check dev services.
-triggers:
-  - runtime
-  - start:dev
-  - health-check
-  - smoke
-  - local backend
-  - admin UI
-  - media infra
-  - browser smoke
-  - dev services
-scope:
-  workspace: /home/sellgar/projects/my/sellgar.workspace
+description: >-
+  Запускает, переиспользует и smoke-check локальный Sellgar runtime: backend
+  services, gateways, admin UI, RabbitMQ-dependent flows, media service, MinIO,
+  local CDN, health endpoints и browser scenarios. Использовать для start:dev,
+  проверки локального endpoint, runtime-инцидента, upload/images/auth/events и
+  manual browser evidence. Не использовать как разрешение изменять production
+  code или перезапускать чужие процессы без диагностики.
 ---
 
 # Sellgar Dev Runtime
 
-## Метаданные
+## Область и приоритет
 
-```yaml
-name: sellgar-dev-runtime
-description: Запускает и smoke-check локальный Sellgar runtime, backend services, admin UI, media infra, health checks и browser/manual smoke.
-triggers:
-  - runtime
-  - start:dev
-  - health-check
-  - smoke
-  - local backend
-  - admin UI
-  - media infra
-  - browser smoke
-  - dev services
-scope:
-  workspace: /home/sellgar/projects/my/sellgar.workspace
-```
+- Применяй этот скилл только к локальному runtime и smoke-проверкам Sellgar workspace.
+- Перед запуском читай `agent/docs/README.md`, `agent/docs/dev-modes.md`, `agent/docs/dev-command-matrix.md` и ближайший `AGENTS.md` каждого запускаемого repo.
+- Сверяй команды и порты с текущими package scripts и `.env`; не восстанавливай их по памяти.
+- Для полного admin stack используй `sellgar-admin-start`. Для auth/session сценариев дополняй маршрут `sellgar-auth-session`.
+- Диагностика runtime не разрешает автоматически исправлять код. Сначала отдели process/infra/config/contract failure от дефекта реализации.
 
-Используй этот skill, когда задача требует локальный service, UI, endpoint или manual/browser smoke в Sellgar workspace.
+## Алгоритм
 
-## Обязательное Чтение
+1. Зафиксируй exact scenario, ожидаемый endpoint/UI path и наблюдаемую ошибку.
+2. Из workspace root выполни `./agent/scripts/status-all.sh` и подходящий profile `./agent/scripts/health-check.sh`.
+3. Проверь активные процессы, listening ports и Docker containers; установи владельца каждого занятого порта.
+4. Выбери минимальный runtime mode, достаточный для сценария.
+5. Переиспользуй уже запущенные корректные процессы. Запускай отсутствующие services в отдельных долгоживущих sessions.
+6. Дождись readiness evidence: compile success, broker/storage connection, route mapping или listening port.
+7. Выполни exact HTTP/API/browser scenario и сохрани status, headers, logs или UI observation.
+8. Проверь, что запуск не изменил tracked source, lockfiles или env contracts.
+9. Оставь требуемые пользователю sessions запущенными и перечисли их; временные диагностические процессы останови.
 
-Читай:
+## STATE — начальное состояние
 
-- `agent/docs/README.md`
-- `agent/docs/dev-modes.md`
-- `agent/docs/dev-command-matrix.md`
-- ближайший `AGENTS.md` для каждого запускаемого service или UI
+- **STATE-1.** Используй узкий health profile, когда задача касается одной зоны; `full` запускай для широкого runtime или по явному запросу.
+- **STATE-2.** Не считай отсутствие HTTP health ошибкой RMQ-only service. Проверяй `identity`, `product`, `store` и `shop` по startup logs, consumers и сквозному gateway/UI сценарию.
+- **STATE-3.** Не убивай процесс только из-за занятого порта. Сначала установи command, cwd и отношение процесса к пользовательской задаче.
+- **STATE-4.** Не пересоздавай Docker volumes и не очищай storage/cache без явной необходимости и подтверждения.
 
-## Начинай С Состояния
+## RUN — запуск
 
-Из `/home/sellgar/projects/my/sellgar.workspace` проверь текущее состояние:
+- **RUN-1.** Запускай каждый `start:dev` в отдельной долгоживущей session; не объединяй независимые services в один foreground command.
+- **RUN-2.** Не запускай второй экземпляр service на том же порту, если существующий процесс соответствует текущему checkout и отвечает.
+- **RUN-3.** Не изменяй dependency tree, lockfile или package manager version ради запуска. Если закреплённый package manager недоступен, используй уже установленный точный бинарник либо сообщи blocker.
+- **RUN-4.** Если sandbox блокирует необходимое локальное соединение, повтори тот же in-scope запуск с явным escalation; не меняй application code для обхода sandbox.
+- **RUN-5.** Для media path проверяй всю цепочку `browser/CDN :8088 → media :5050 → MinIO :9000 → file metadata/RMQ` в необходимом сценарию объёме.
 
-```bash
-./agent/scripts/status-all.sh
-./agent/scripts/health-check.sh full
-```
+## Частые entrypoints
 
-Если важна только одна зона, используй узкий health profile из `agent/scripts/health-check.sh --help`.
+| Компонент      | Рабочая директория                       | Ожидаемый local endpoint |
+| -------------- | ---------------------------------------- | ------------------------ |
+| Admin gateway  | `backend/gateway/sellgar.admin.gateway`  | `http://localhost:4020`  |
+| Socket gateway | `backend/gateway/sellgar.socket.gateway` | `http://localhost:4040`  |
+| File service   | `backend/service/sellgar.file.service`   | `http://localhost:5040`  |
+| Media service  | `backend/service/sellgar.media.service`  | `http://localhost:5050`  |
+| Admin UI       | `frontend/sellgar.ui.admin`              | `http://localhost:3000`  |
+| Local CDN      | media Docker infra                       | `http://localhost:8088`  |
+| MinIO console  | media Docker infra                       | `http://localhost:9001`  |
 
-## Runtime Правила
+## VERIFY — smoke evidence
 
-- Выбирай минимальный runtime mode, который доказывает поведение.
-- Переиспользуй уже запущенные services, если их состояние подтверждено.
-- Считай build только compile evidence.
-- Для поведения, связанного с auth/session, persistence, upload, images, events, permissions или browser UI, собирай runtime или browser/manual evidence.
-- `identity`, `product`, `store` и `shop` services в этом workspace RMQ-oriented и могут не иметь HTTP health endpoints. Проверяй их через logs, consumers и gateway/admin UI scenarios.
-- Для media upload/CDN behavior включай checks для MinIO и local CDN.
+- **VERIFY-1.** Считай build только compile evidence. Для auth/session, persistence, upload, images, events, permissions и browser UI обязательно собирай runtime/manual evidence.
+- **VERIFY-2.** Для HTTP фиксируй exact method, URL, status, relevant headers и response meaning; не выводи secrets, cookies или tokens.
+- **VERIFY-3.** Для browser flow фиксируй URL, user steps, observed result и необходимость сохранённого automated test.
+- **VERIFY-4.** Если инфраструктура отвечает, но объект отсутствует, различай `404`, authorization, metadata failure и upstream `5xx`; не лечи их одним frontend fallback.
+- **VERIFY-5.** После запуска проверь `git status --short` в затронутых repositories и не оставляй generated output в task scope.
 
-## Частые Entrypoints
+## Завершение
 
-- Admin gateway: `backend/gateway/sellgar.admin.gateway`, ожидаемый local port `4020`.
-- Admin UI: `frontend/sellgar.ui.admin`, ожидаемый local URL `http://localhost:3000`.
-- File service: `backend/service/sellgar.file.service`, ожидаемый local port `5040`.
-- Media service: `backend/service/sellgar.media.service`, ожидаемый local port `5050`.
+Укажи:
 
-Всегда сверяй текущую команду в `agent/docs/dev-command-matrix.md` и ближайшем repo `AGENTS.md` перед запуском.
-
-## Closeout
-
-Указывай точные URLs/endpoints, scenario steps, observed result и residual risk. Если automated test не добавлен, объясняй, почему manual smoke достаточен.
+- переиспользованные и запущенные processes/containers;
+- exact ports и URLs;
+- smoke steps и observed result;
+- sessions, оставленные запущенными;
+- команды, которые не удалось выполнить, и точный blocker;
+- изменённые файлы или `none`;
+- residual risk.

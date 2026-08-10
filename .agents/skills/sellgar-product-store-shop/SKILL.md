@@ -1,94 +1,105 @@
 ---
 name: sellgar-product-store-shop
-description: Маршрутизирует Sellgar commerce-domain задачи product/store/shop, variants, images, offers, prices, inventory, reservations, outbox/inbox и snapshots.
-id: sellgar-product-store-shop
-title: Sellgar Product Store Shop
-summary: Маршрутизация commerce-domain задач product/store/shop в Sellgar.
-triggers:
-  - product
-  - store
-  - shop
-  - variant
-  - images
-  - offer
-  - price
-  - currency
-  - inventory
-  - reservation
-  - outbox
-  - inbox
-  - snapshot
-scope:
-  workspace: /home/sellgar/projects/my/sellgar.workspace
+description: >-
+  Маршрутизирует и проверяет cross-repo commerce-domain изменения Sellgar для
+  catalog product, variants, images, brands/categories/properties/units, shops,
+  store products, offers, currencies, prices, inventory, reservations,
+  outbox/inbox, snapshots и admin read models. Использовать при проектировании,
+  реализации, рефакторинге или аудите contract flow между product/store/shop
+  services, gateways и clients. Не смешивает service ownership и не считает
+  snapshot или gateway source of truth.
 ---
 
-# Sellgar Product Store Shop
+# Product, Store и Shop в Sellgar
 
-## Метаданные
+## Область и приоритет
 
-```yaml
-name: sellgar-product-store-shop
-description: Маршрутизирует Sellgar commerce-domain задачи product/store/shop, variants, images, offers, prices, inventory, reservations, outbox/inbox и snapshots.
-triggers:
-  - product
-  - store
-  - shop
-  - variant
-  - images
-  - offer
-  - price
-  - currency
-  - inventory
-  - reservation
-  - outbox
-  - inbox
-  - snapshot
-scope:
-  workspace: /home/sellgar/projects/my/sellgar.workspace
-```
+- Применяй этот скилл к commerce-domain задачам, пересекающим `product_srv`, `store_srv`, `shop_srv`, gateways и clients.
+- Начинай с `agent/docs/README.md`, `agent/docs/product-store-shop-architecture.md` и ближайшего `AGENTS.md` каждого реально затрагиваемого service/gateway/client package.
+- Считай фактические public contracts, migrations/entities и current consumers evidence текущего состояния. Считай `product-store-shop-architecture.md` целевой моделью; при противоречии зафиксируй divergence и не придумывай миграционный шаг.
+- Если задача попадает в `Open Decisions` архитектурного документа или требует сменить service ownership, остановись и запроси решение до реализации.
+- Применяй frontend skills только к frontend-части, backend правила — только к service/gateway owners.
 
-Используй этот skill для commerce-domain работы, которая может пересекать `product_srv`, `store_srv`, `shop_srv`, admin gateway и admin UI.
+## Режимы
 
-## Обязательное Чтение
+- **Проектирование:** определи owners, commands, events, consistency boundary и migration path до кода.
+- **Реализация:** обнови owner и каждого непосредственного producer/consumer изменённого контракта.
+- **Диагностика:** проследи flow и остановись на evidence/verdict, если исправление не запрошено.
+- **Аудит:** не изменяй код; перечисли ownership, contract, consistency и verification нарушения.
 
-Начинай с:
+## Алгоритм
 
-- `agent/docs/README.md`
-- `agent/docs/product-store-shop-architecture.md`
-- affected service `AGENTS.md`
-- affected gateway/frontend `AGENTS.md`, если меняется API или UI contract
+1. Назови изменяемый aggregate/use case и пользовательский результат.
+2. Определи source-of-truth service, database tables, public command/query и frontend/gateway consumers.
+3. Найди связанные DTO/entities, migrations, RMQ routes, event envelope, outbox/inbox handlers и snapshots.
+4. Зафиксируй transactional boundary, idempotency key, aggregate version и failure/reconciliation path.
+5. Составь target repos и contract changes; запроси подтверждение, если scope расширяется.
+6. Реализуй owner сначала, затем adapters/consumers, не создавая параллельный legacy contract.
+7. Проверь build/tests каждой стороны и сквозной runtime flow для behavior/event changes.
 
-Считай `product-store-shop-architecture.md` текущей целевой моделью, но проверяй live code перед правками. Live source и local `AGENTS.md` важнее, если draft и implementation расходятся.
+## OWN — владельцы домена
 
-## Ownership
+- **OWN-1.** `product_srv` владеет catalog product, variant, brand, category, property, unit и variant image projection.
+- **OWN-2.** `shop_srv` владеет shop/channel, shop settings и shop lifecycle.
+- **OWN-3.** `store_srv` владеет store product, offer, price history, inventory, reservation и sellable product state.
+- **OWN-4.** Gateway адаптирует transport и собирает admin-facing read models; он не становится владельцем product/store/shop business rules.
+- **OWN-5.** Client потребляет gateway contract и не изобретает service ownership, consistency или pricing rules.
+- **OWN-6.** Не помещай price, stock, reservation, shop, cart или order ownership в `product_srv`.
+- **OWN-7.** Cart и order не принадлежат `store_srv`; store предоставляет sellable state, prices, inventory и reservation boundary.
 
-- `product_srv` владеет catalog product, variant, brand, category, property, unit и image projection.
-- `shop_srv` владеет shop/channel, shop settings и shop lifecycle.
-- `store_srv` владеет store product, offer, price history, inventory, reservation и sellable product state.
-- `sellgar.admin.gateway` собирает admin-facing read models из service owners.
-- Admin UI потребляет gateway contract и не должен изобретать service ownership.
+## REF — ссылки и snapshots
 
-## Жесткие Правила
+- **REF-1.** Используй external UUID references между databases; не добавляй cross-database SQL foreign keys.
+- **REF-2.** Внутри своей database усиливай целостность локальными constraints и foreign keys к owned snapshot/ref tables.
+- **REF-3.** Считай `shop_snapshot`, `product_snapshot` и `variant_snapshot` минимальными consistency/read-model aids, а не source of truth.
+- **REF-4.** Не расширяй snapshot до полной копии внешнего aggregate ради удобства read model.
+- **REF-5.** Не возвращай internal snapshot entity как public frontend model. Собирай явный gateway/service result contract.
+- **REF-6.** Проверяй согласованность `variant_snapshot.product_uuid` и `store_product.product_uuid` до изменения offers.
 
-- Не помещай price, stock, reservation, shop, cart или order ownership в `product_srv`.
-- Не протаскивай internal `store_srv` snapshots как public frontend model.
-- Images в текущем catalog/admin contract принадлежат variants, а не product-level `product.images`.
-- Store snapshots - минимальные consistency/read-model aids, а не дублирующий source of truth.
-- Используй external UUID references между service databases; не добавляй cross-database SQL foreign keys.
-- Храни деньги как PostgreSQL `numeric(12,2)` и TypeScript DTO/entity strings, не floating-point numbers.
-- Применяй external events idempotently через inbox/outbox patterns и сохраняй aggregate versions.
+## IMAGE — изображения
 
-## Проверка
+- **IMAGE-1.** В текущем catalog/admin contract изображение принадлежит variant: используй `variant.images`, а не product-level `product.images`.
+- **IMAGE-2.** Изменение image contract проверяй в product service, admin gateway, file/media flow и client consumer.
+- **IMAGE-3.** Не делай защищённый file metadata/download endpoint публичным ради image preview; public media delivery принадлежит media/CDN contract.
 
-Для contract changes проверяй producer и consumer. Build недостаточен для:
+## MONEY — цены и валюты
 
-- product variant/image behavior;
-- store offers/prices/inventory;
-- gateway read-model composition;
-- event propagation to snapshots/inbox.
+- **MONEY-1.** Храни monetary value в PostgreSQL как `numeric(12,2)` и передавай через TypeScript DTO/entity как decimal string.
+- **MONEY-2.** Не используй floating-point number для денежного значения.
+- **MONEY-3.** Храни price history как owned store data и сохраняй currency reference/contract по текущей модели.
+- **MONEY-4.** Не вычисляй authoritative price во frontend или gateway.
 
-Предпочитай smoke path, который проходит:
+## EVENT — события и согласованность
+
+- **EVENT-1.** Записывай integration event в transactional outbox той же транзакции, что изменяет aggregate.
+- **EVENT-2.** Обрабатывай внешнее событие idempotently через inbox с unique `event_uuid`.
+- **EVENT-3.** Передавай и проверяй aggregate version; duplicate/old event не должен откатывать snapshot.
+- **EVENT-4.** При version gap создавай sync issue/reconciliation path, а не применяй событие вслепую.
+- **EVENT-5.** Не считай published outbox доказательством applied consumer state. Для smoke подтверждай publisher outbox, consumer inbox и целевой snapshot/read model.
+- **EVENT-6.** Для command retry используй стабильный command id и idempotent owner contract.
+
+## VERIFY — acceptance
+
+- **VERIFY-1.** Для contract change проверяй owning producer, gateway adapter и каждого изменённого client consumer.
+- **VERIFY-2.** Для event flow проверяй write transaction, outbox publication, RMQ delivery, inbox processing, snapshot/version и reconciliation errors.
+- **VERIFY-3.** Для offers/prices/inventory/reservation одного build недостаточно; выполни owner API/RMQ или UI-to-service runtime scenario.
+- **VERIFY-4.** Для variant/images выполни save/read/media scenario через актуальный admin contract.
+- **VERIFY-5.** Не меняй production contract ради упрощённого fixture. Создавай fixture, соответствующий реальным Entity/DTO constraints.
+
+Предпочтительный сквозной путь:
 
 ```text
-admin UI -> admin gateway -> owning service -> outbox/RMQ -> consumer inbox/snapshot
+admin UI → admin gateway → owning service → outbox/RMQ → consumer inbox/snapshot
 ```
+
+## Аудит
+
+Проверь ownership, public contracts, database boundaries, monetary types, image ownership, idempotency, versions, outbox/inbox, snapshot minimality, producer/consumer coverage и runtime evidence. Каждое нарушение связывай с точным owner/file и исправлением; не объединяй разные contract boundaries в одно замечание.
+
+## Завершение
+
+- Перечисли изменённые owners, contracts, events и consumers.
+- Укажи migrations/data impact и backward-compatibility decision.
+- Перечисли build/tests и exact runtime scenario.
+- Назови непроверенные consumers, event paths и residual consistency risk.
+- Укажи submodule/nested library gitlink impact.

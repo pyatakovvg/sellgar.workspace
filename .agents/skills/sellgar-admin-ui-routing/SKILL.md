@@ -1,48 +1,62 @@
 ---
 name: sellgar-admin-ui-routing
-description: Маршрутизирует Sellgar admin frontend изменения в pages, frames, widgets, layouts, library/design, library/domain, tiyn-app runtime, routes и hash frames.
+description: >-
+  Маршрутизирует изменения web frontend Sellgar Admin между application host,
+  pages, frames, widgets, layouts, shared design/domain libraries, @sellgar/app
+  runtime и nested UI packages. Использовать перед разработкой, рефакторингом
+  или аудитом в frontend/sellgar.ui.admin, когда нужно определить владельца
+  файла, package boundary, обязательные документы и проверки. Не применять к
+  backend, mobile или внутренним правилам React-компонента и framework-единицы.
 ---
 
 # Маршрутизация Sellgar Admin UI
 
-Используй этот skill перед правками в `frontend/sellgar.ui.admin`.
+## Область и приоритет
 
-## Обязательное Чтение
+- Применяй этот скилл только к `frontend/sellgar.ui.admin` и его nested frontend submodules.
+- Используй его для выбора package-владельца и маршрута чтения. Детальные правила framework-единиц передавай `fe-module-create`, React-компонентов — `fe-react-component-structure`, frontend domain packages — `fe-domain-structure`, UI kit — `sellgar-ui-kit-component`.
+- Считай `frontend/sellgar.ui.admin/AGENTS.md`, `frontend/sellgar.ui.admin/docs/agent/task-routing.md` и ближайший package `AGENTS.md` источниками текущих repo-specific контрактов. При расхождении с фактическим деревом сначала зафиксируй противоречие, не выдумывай отсутствующий путь.
+- Не применяй этот скилл к backend, mobile, infrastructure или server-side packages.
 
-Читай:
+## Алгоритм
 
-- workspace `agent/docs/README.md`, если стартуешь из `sellgar.workspace`;
-- `frontend/sellgar.ui.admin/AGENTS.md`;
-- `frontend/sellgar.ui.admin/docs/agent/task-routing.md`;
-- ближайший package `AGENTS.md` для целевого page/frame/widget/library package.
+1. Определи пользовательский сценарий и вид изменения: route screen, drawer/modal, embedded block, shared UI, domain/data access, framework runtime или application composition.
+2. Прочитай workspace `agent/docs/README.md`, если задача началась из workspace root.
+3. Прочитай `frontend/sellgar.ui.admin/AGENTS.md`, `frontend/sellgar.ui.admin/docs/agent/task-routing.md` и ближайший `AGENTS.md` целевого package.
+4. Найди существующих владельца, публичный facade и непосредственных потребителей до выбора нового пути.
+5. Зафиксируй target package и профильные frontend skills до изменения файлов.
+6. После реализации проверь package-local commands и реальный browser path, если менялось UI behavior.
 
-## Правила Размещения
+## PLACE — владельцы изменений
 
-- Application bootstrap, route tree, auth gates и host bindings: `clients/admin/src/application`.
-- Route screens, list pages, route loaders и route-level content: `pages/<feature>`.
-- Drawer или modal workflows со своими bindings/controller/view: `frames/<feature>`.
-- Reusable embedded blocks: `widgets/<name>`.
-- Visual-only shared wrappers: `library/design`.
-- Entities, repositories, API clients и HTTP helpers: `library/domain`.
-- Runtime framework changes: `library/tiyn-app`.
-- Pure helpers: `utils/*`.
+- **PLACE-1.** Размещай application bootstrap, route tree, auth gates, host bindings и composition root в `clients/admin/src/application`.
+- **PLACE-2.** Размещай route screen, list/details page, route loader и route-level content в `pages/<feature>`.
+- **PLACE-3.** Размещай drawer или modal workflow с собственными params, bindings, controller и view в `frames/<feature>`. Не переноси такой workflow в `widgets`.
+- **PLACE-4.** Размещай переиспользуемый embedded runtime block в `widgets/<name>`.
+- **PLACE-5.** Размещай layout composition в `layouts/<name>` и не превращай layout в владельца feature business logic.
+- **PLACE-6.** Размещай visual-only shared abstractions в `library/design`; не добавляй туда domain, controller или feature-specific data access.
+- **PLACE-7.** Размещай frontend Entity, Service ports, gateways, repositories и HTTP adapters в `library/domain` по правилам `fe-domain-structure`.
+- **PLACE-8.** Изменяй framework runtime `@sellgar/app` только в nested submodule `library/sellgar.app.ui` и читай его ближайший `AGENTS.md`.
+- **PLACE-9.** Изменяй UI kit `@sellgar/kit` только в nested submodule `library/sellgar.kit.ui` по `sellgar-ui-kit-component`.
+- **PLACE-10.** Размещай pure helpers без feature ownership в `utils/*`; не используй `utils` как обход package boundary.
 
-Не переносить drawer/modal feature workflows в `widgets`.
+## BOUNDARY — границы
 
-После переноса файлов или каталога между слоями удали каждый ставший пустым каталог в исходном и целевом дереве, включая опустевшую цепочку родителей. Не оставляй каталог только потому, что Git его не отслеживает; перед завершением явно проверь обе затронутые границы на пустые каталоги.
-
-## UI Правила
-
-- Используй `@sellgar/app` module/frame/controller patterns, уже принятые в repo.
-- Используй `@sellgar/kit` components и `@sellgar/kit/icons`; не заменяй их ad hoc widgets, когда kit API подходит.
-- При правках repo docs держи документацию и agent prose на русском.
-- Для route/frame behavior проверяй реальный browser path, когда он доступен.
+- **BOUNDARY-1.** Не импортируй private implementation другого page/frame/widget/library package. Используй его public facade или перенеси действительно общую абстракцию к подходящему владельцу.
+- **BOUNDARY-2.** Не исправляй framework defect локальным feature workaround, пока не проверен владелец в `library/sellgar.app.ui`.
+- **BOUNDARY-3.** Не дублируй kit primitive локальным ad hoc компонентом, если `@sellgar/kit` уже предоставляет нужный контракт.
+- **BOUNDARY-4.** После переноса удали опустевшие каталоги во всём затронутом исходном и целевом дереве.
+- **BOUNDARY-5.** Сохраняй документацию и agent prose на русском; paths, package names, commands и API identifiers оставляй как code literals.
 
 ## Проверка
 
-Используй repo commands из local docs. Для UI behavior предпочитай browser/manual smoke и указывай:
+1. Проверь, что каждый изменённый файл находится у установленного владельца и не создаёт forbidden deep import.
+2. Запусти documented formatting, lint, typecheck, tests или build целевого package в объёме изменения.
+3. Для route/frame behavior укажи exact URL, шаги, наблюдаемый результат и причину manual-only проверки, если автоматического покрытия нет.
+4. Проверь nested submodule и gitlink impact, если менялись `library/sellgar.kit.ui`, `library/sellgar.orm.ui` или `library/sellgar.app.ui`.
 
-- exact URL;
-- user steps;
-- observed result;
-- был ли добавлен automated coverage или почему manual-only достаточно.
+## Завершение
+
+- Перечисли выбранного владельца, применённые frontend skills, изменённые packages и команды проверки.
+- Отдельно укажи заблокированные проверки, внешние ошибки и residual risk.
+- Не объявляй задачу полностью проверенной, если browser/runtime acceptance требовался, но не выполнялся.

@@ -1,68 +1,74 @@
 ---
 name: sellgar-workspace-route
-description: Маршрутизирует задачи Sellgar workspace, cross-repo реализацию, backend/frontend/mobile изменения, task contract, closeout и workspace orchestration.
-id: sellgar-workspace-route
-title: Sellgar Workspace Route
-summary: Маршрутизация задач и closeout в Sellgar workspace.
-triggers:
-  - sellgar.workspace
-  - workspace
-  - cross-repo
-  - task contract
-  - closeout
-  - backend/frontend/mobile
-  - workspace orchestration
-scope:
-  workspace: /home/sellgar/projects/my/sellgar.workspace
+description: >-
+  Маршрутизирует задачи в Sellgar workspace между workspace root, git
+  submodules, backend, web frontend, mobile и профильными skills; фиксирует task
+  contract, scope, dirty-state ownership, acceptance и closeout. Использовать
+  первым для cross-repo изменений, неизвестного владельца, реализации из
+  workspace root, диагностики, runtime, submodule и commit workflows. Не
+  заменяет repo-local архитектурные правила и не является разрешением менять все
+  затронутые слои.
 ---
 
 # Маршрут Sellgar Workspace
 
-## Метаданные
+## Область и приоритет
 
-```yaml
-name: sellgar-workspace-route
-description: Маршрутизирует задачи Sellgar workspace, cross-repo реализацию, backend/frontend/mobile изменения, task contract, closeout и workspace orchestration.
-triggers:
-  - sellgar.workspace
-  - workspace
-  - cross-repo
-  - task contract
-  - closeout
-  - backend/frontend/mobile
-  - workspace orchestration
-scope:
-  workspace: /home/sellgar/projects/my/sellgar.workspace
-```
+- Применяй этот скилл как первый слой маршрутизации из Sellgar workspace root.
+- Используй `agent/docs/README.md` как индекс минимального маршрута и читай только документы, необходимые для типа задачи.
+- После workspace route обязательно читай ближайший `AGENTS.md` каждого затронутого submodule и package.
+- Не используй этот скилл как архитектурный стандарт feature-code. Передавай реализацию профильному repo/domain/frontend/mobile skill.
+- Явный пользовательский scope ограничивает работу; обнаруженная зависимость не расширяет разрешённые изменения автоматически.
 
-Используй этот skill как первый слой маршрутизации для работы в Sellgar submodule workspace.
+## Режимы
 
-## Маршрут
+- **Диагностика:** собери evidence, verdict и next action; не изменяй код без явного запроса на исправление.
+- **Реализация:** зафиксируй task contract, владельцев, in/out of scope и acceptance до правок.
+- **Runtime:** передай запуск и smoke skill `sellgar-dev-runtime`; полный admin stack — `sellgar-admin-start`.
+- **Commit:** передай staging, commit и push skill `sellgar-commit-changes`.
+- **Submodules:** передай sync, detached state и gitlinks skill `sellgar-submodule-maintenance`.
 
-Начинай с `/home/sellgar/projects/my/sellgar.workspace/agent/docs/README.md`.
+## Алгоритм
 
-Перед широким исследованием читай только минимальный маршрут под тип задачи:
+1. Определи тип запроса: анализ, реализация, runtime, auth, commerce, frontend, mobile, submodule или commit.
+2. Прочитай `agent/docs/README.md` и выбери минимальный документальный маршрут.
+3. Выполни `./agent/scripts/status-all.sh`, если задача может изменять файлы, submodules или runtime state.
+4. Определи target repositories, текущие branches, существующий dirty state и владельца каждого изменения.
+5. Для реализации кратко зафиксируй task contract по `agent/docs/agent/task-contract.md`.
+6. Подключи только профильные skills и ближайшие `AGENTS.md` для реально затрагиваемых границ.
+7. Реализуй или диагностируй в рамках установленного scope.
+8. Выполни closeout по `agent/docs/agent/closeout-gates.md` и перечисли доказательства, пропуски и residual risk.
 
-- Реализация, cross-repo работа или незафиксированный scope: читай `agent/docs/agent/task-contract.md`.
-- Submodules, detached state или sync: читай `agent/docs/submodules-workflow.md`.
-- Локальный runtime, dev services или health checks: читай `agent/docs/dev-modes.md` и `agent/docs/dev-command-matrix.md`.
-- Домен product/store/shop: читай `agent/docs/product-store-shop-architecture.md`.
-- Финальные проверки: читай `agent/docs/agent/closeout-gates.md`.
+## ROUTE — выбор владельца
 
-После workspace route читай ближайший `AGENTS.md` в каждом затронутом submodule или package.
+- **ROUTE-1.** Оставляй в workspace root только submodule pointers, `.agents/skills`, `agent/docs`, `agent/scripts` и минимальные workspace entrypoints.
+- **ROUTE-2.** Размещай backend feature-code в соответствующем `backend/gateway/*` или `backend/service/*` submodule.
+- **ROUTE-3.** Размещай admin web frontend в `frontend/sellgar.ui.admin` и начинай с `sellgar-admin-ui-routing`.
+- **ROUTE-4.** Размещай desktop frontend в `frontend/sellgar.ui.desktop` и читай его ближайший `AGENTS.md`.
+- **ROUTE-5.** Размещай mobile code в `mobile/sellgar.mobile`; frontend skills с областью web frontend к нему не применяй.
+- **ROUTE-6.** Для product/store/shop ownership используй `sellgar-product-store-shop` и актуальный service owner.
+- **ROUTE-7.** Для auth/session границ используй `sellgar-auth-session`.
+- **ROUTE-8.** Не коммить feature-code submodule как обычные файлы workspace root.
 
-## Правила Workspace
+## SCOPE — task contract и изменения
 
-- Считай workspace root владельцем submodule pointers и `agent/` docs/scripts.
-- Держи feature-code внутри соответствующего submodule, не обычными файлами в workspace root.
-- Используй `master` как default branch, если пользователь не сказал другое.
-- Проверяй dirty state до правок и отделяй unrelated локальные изменения от task scope.
-- Для диагностических задач останавливайся на evidence, verdict и next action, пока пользователь явно не попросит реализацию.
-- Если меняется контракт frontend/gateway/service, проверяй producer и consumer; один build не является acceptance.
+- **SCOPE-1.** Фиксируй goal, target repos, branch, in/out of scope, acceptance, проверки и submodule pointer impact.
+- **SCOPE-2.** Используй `master` как default branch, если пользователь не задал другую.
+- **SCOPE-3.** Отделяй related changes от существовавших unrelated, generated, local и env файлов. Не присваивай чужие изменения.
+- **SCOPE-4.** Если новый владелец или изменение внешнего контракта расширяет task scope, остановись и запроси направление до записи в дополнительный repo.
+- **SCOPE-5.** Не изменяй production-код ради прохождения теста. Исправляй production только по пользовательскому поведению и реальному контракту; тест должен проверять этот контракт.
+- **SCOPE-6.** Не считай build доказательством runtime behavior, persistence, permissions, side effects, external calls или browser flow.
 
-## Closeout
+## VERIFY — доказательства
 
-Для workspace или cross-repo задач запускай либо явно пропускай с причиной:
+- **VERIFY-1.** Для contract change проверяй producer и каждого изменённого consumer.
+- **VERIFY-2.** Для bugfix сохраняй red evidence либо указывай точную причину, почему его нельзя получить.
+- **VERIFY-3.** Для runtime/UI behavior указывай exact URL или command, шаги, наблюдаемый результат и оставшийся риск.
+- **VERIFY-4.** Не приписывай целевой задаче ошибку проверки из внешнего или уже повреждённого файла; отмечай проверку заблокированной с evidence.
+
+## Завершение
+
+Выполни либо явно пропусти с причиной:
 
 ```bash
 ./agent/scripts/status-all.sh
@@ -70,8 +76,11 @@ git status --short --branch
 git submodule status
 ```
 
-Для runtime-задач дополнительно рассматривай:
+В финальном отчёте укажи:
 
-```bash
-./agent/scripts/health-check.sh full
-```
+- branch и изменённые repositories/files;
+- выполненные команды и результаты;
+- пропущенные или заблокированные проверки;
+- docs и skills, изменённые вместе с контрактом;
+- submodule commits и gitlink impact;
+- residual risk и следующий action, если задача не завершена.
