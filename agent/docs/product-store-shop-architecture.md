@@ -259,6 +259,31 @@ Offer -> InventoryMovement
 - `product.images` не существует в текущем catalog contract и не должно появляться в BFF-модели.
   Изображения принадлежат варианту: `offer.variant.images`.
 
+HTTP и realtime обязаны использовать один путь сборки admin read model:
+
+```text
+domain service outbox event
+  -> sellgar.admin.gateway read-model adapter/composer
+  -> realtime.delivery.requested.v1
+  -> sellgar.socket.gateway
+  -> admin frontend
+```
+
+- `sellgar.admin.gateway` валидирует доменный envelope и payload, собирает тот же
+  admin-facing Entity contract, который возвращает HTTP, и только затем
+  публикует `realtime.delivery.requested.v1`;
+- исходный `eventUuid` сохраняется при преобразовании, чтобы повтор после сбоя
+  между publish и ACK дедуплицировался в Socket Gateway;
+- `sellgar.socket.gateway` не принимает `product.updated`,
+  `store.product.updated` и другие доменные envelopes напрямую, не знает
+  snapshots и не собирает read model;
+- frontend realtime provider получает готовую Entity в payload, валидирует её
+  через `class-transformer`/`class-validator` и не выполняет компенсирующий HTTP
+  запрос;
+- новый тип realtime-события добавляется через adapter владельца клиентской read
+  model и общий delivery contract, а не отдельным transport path в Socket
+  Gateway или frontend.
+
 Целевая форма JSON для frontend:
 
 ```json
