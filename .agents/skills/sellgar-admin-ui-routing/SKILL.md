@@ -117,9 +117,10 @@ cleanup.
   route declaration.
 - Address, policies, lazy load, layouts и nested `Router` принадлежат target
   route graph в application host.
-- Pages остаются `pages/*` и объявляются через v2 `@Module`; nested workflows
-  остаются `frames/*` и объявляются через v2 `@Frame`; embedded blocks остаются
-  `widgets/*` и объявляются через v2 `@Widget`.
+- Pages остаются `pages/*`; nested workflows остаются `frames/*`. Оба типа
+  runtime consumer объявляются через единый v2 `@Module`; compatibility alias
+  `@Frame` не используется. Embedded blocks остаются `widgets/*` и объявляются
+  через v2 `@Widget`.
 - Навигация target slice выполняется через route token и v2 navigate service,
   не через string URL, `react-router-dom`, `useFrame` или hash constants.
 - Route params выводятся из token и приходят через `args.params`, а не через V1
