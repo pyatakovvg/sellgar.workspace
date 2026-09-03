@@ -38,6 +38,7 @@
 | Admin frontend | `frontend/sellgar.ui.admin/AGENTS.md` | browser/manual smoke + frontend build |
 | UI kit | `frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md` | storybook/build checks |
 | Desktop UI | nearest `AGENTS.md`, если появится | package-local build/run |
+| Mobile shop frontend | nearest `AGENTS.md`, если появится | package-local build/run |
 | Mobile app | nearest `AGENTS.md`, если появится | package-local build/run |
 
 ## Repo Entrypoints
@@ -59,6 +60,7 @@ Frontend:
 - `frontend/sellgar.ui.admin/AGENTS.md`
 - `frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md`
 - `frontend/sellgar.ui.desktop/AGENTS.md`, если будет добавлен
+- `frontend/sellgar.mobile.shop/README.md`
 
 Mobile:
 

@@ -46,3 +46,7 @@
 	path = backend/gateway/sellgar.socket.gateway
 	url = git@github.com:pyatakovvg/sellgar.socket.gateway.git
 	branch = master
+[submodule "frontend/sellgar.mobile.shop"]
+	path = frontend/sellgar.mobile.shop
+	url = git@github.com:pyatakovvg/sellgar.mobile.shop.git
+	branch = main

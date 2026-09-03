@@ -20,6 +20,7 @@ REPOS=(
   "sellgar.ui.admin"
   "sellgar.kit.ui"
   "sellgar.ui.desktop"
+  "sellgar.mobile.shop"
   "sellgar.orm.ui"
   "sellgar.app.ui"
   "sellgar.mobile"
@@ -39,6 +40,7 @@ CLONE_REPOS=(
   "sellgar.ui.admin"
   "sellgar.kit.ui"
   "sellgar.ui.desktop"
+  "sellgar.mobile.shop"
   "sellgar.orm.ui"
   "sellgar.app.ui"
   "sellgar.mobile"
@@ -89,6 +91,9 @@ repo_dir() {
       ;;
     sellgar.ui.desktop)
       printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.desktop"
+      ;;
+    sellgar.mobile.shop)
+      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.mobile.shop"
       ;;
     sellgar.orm.ui)
       printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin/library/sellgar.orm.ui"

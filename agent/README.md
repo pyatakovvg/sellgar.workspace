@@ -15,6 +15,7 @@
 | Backend service | `backend/service/sellgar.media.service` | Media upload/CDN/MinIO service |
 | Frontend | `frontend/sellgar.ui.admin` | Admin frontend |
 | Frontend | `frontend/sellgar.ui.desktop` | Desktop UI |
+| Frontend | `frontend/sellgar.mobile.shop` | Mobile shop frontend |
 | Frontend nested library | `frontend/sellgar.ui.admin/library/sellgar.kit.ui` | UI kit/storybook |
 | Frontend nested library | `frontend/sellgar.ui.admin/library/sellgar.orm.ui` | ORM UI |
 | Frontend nested library | `frontend/sellgar.ui.admin/library/sellgar.app.ui` | App UI |
