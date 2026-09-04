@@ -45,7 +45,7 @@ description: >-
 - **ROUTE-2.** Размещай backend feature-code в соответствующем `backend/gateway/*` или `backend/service/*` submodule.
 - **ROUTE-3.** Размещай admin web frontend в `frontend/sellgar.ui.admin` и начинай с `sellgar-admin-ui-routing`.
 - **ROUTE-4.** Размещай desktop frontend в `frontend/sellgar.ui.desktop` и читай его ближайший `AGENTS.md`.
-- **ROUTE-5.** Размещай mobile code в `mobile/sellgar.mobile`; frontend skills с областью web frontend к нему не применяй.
+- **ROUTE-5.** Размещай код мобильного shop-приложения в `frontend/sellgar.mobile.shop`; `mobile/sellgar.mobile` считай отдельным mobile repository. Frontend skills с областью web frontend к mobile-коду не применяй.
 - **ROUTE-6.** Для product/store/shop ownership используй `sellgar-product-store-shop` и актуальный service owner.
 - **ROUTE-7.** Для auth/session границ используй `sellgar-auth-session`.
 - **ROUTE-8.** Не коммить feature-code submodule как обычные файлы workspace root.

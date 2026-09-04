@@ -217,15 +217,23 @@ cd frontend/sellgar.ui.desktop
 
 Команды зависят от package scripts. Перед запуском проверь локальный `package.json`.
 
-## Mobile
+## Mobile Shop
 
 Рабочая директория:
 
 ```bash
-cd mobile/sellgar.mobile
+cd frontend/sellgar.mobile.shop
 ```
 
-Команды зависят от mobile stack. Перед запуском проверь локальный `AGENTS.md` или `package.json`.
+```bash
+yarn install
+yarn workspace @client/mobile typecheck
+yarn dev:mobile
+yarn android:mobile
+```
+
+Для других mobile repositories перед запуском проверь локальный `AGENTS.md` и
+`package.json`.
 
 ## Cross-Repo Проверки
 

@@ -33,7 +33,11 @@ git add backend/gateway/sellgar.admin.gateway backend/gateway/sellgar.client.gat
 git commit -m "chore: update sellgar submodules"
 ```
 
-`sellgar.kit.ui`, `sellgar.orm.ui` и `sellgar.app.ui` являются nested submodules репозитория `sellgar.ui.admin`. Сначала коммить изменения nested library в её repository, затем gitlink в admin UI и только после этого workspace pointer admin UI.
+`sellgar.kit.ui` и `sellgar.orm.ui` являются nested submodules репозитория
+`sellgar.ui.admin`. `sellgar.app.ui` — общий nested submodule для
+`sellgar.ui.admin` и `sellgar.mobile.shop`; оба parent repository должны
+указывать на один framework commit. Сначала коммить изменения nested library,
+затем gitlinks обоих приложений и только после этого их workspace pointers.
 
 Не встраивай auto-update submodules в scripts запуска приложений. Запуск приложения не должен незаметно менять код.
 
