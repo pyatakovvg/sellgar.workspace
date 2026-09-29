@@ -144,19 +144,51 @@ occurred_at
 payload
 ```
 
-Lifecycle-правило:
+Lifecycle `product`:
 
-- `product` и `variant` имеют одинаковую статусную модель: `active`, `archived`, `disabled`.
-  В PostgreSQL это enum `catalog_status_enum`, а в TypeScript - `CatalogStatus`.
-- Обычные read/list выборки исключают только `archived`. Статус `disabled` должен возвращаться
-  наружу как обычное состояние сущности, чтобы UI и gateway могли явно видеть причину
-  недоступности, а не терять запись.
-- Пользовательское удаление товара или варианта не делает физический `DELETE`. Оно переводит
-  сущность в статус `archived`, увеличивает `version` и публикует событие с новым `status`.
+- `template` — редактируемый товар-образец. Он доступен только в Admin, не может использоваться
+  в `store_srv`, а его копирование создаёт новый независимый `draft` через обычный create flow.
+- `draft` — рабочая карточка каталога. Она может быть неполной и не может использоваться в
+  `store_srv`.
+- `published` — карточка опубликована в каталоге и разрешена для использования в Store. В Admin
+  пользовательское название статуса — «В каталоге»; он не означает продажу или показ на витрине.
+- `archived` — карточка глобально выведена из использования. Snapshot с этим статусом блокирует
+  продажу существующих StoreProduct/Offer, но не удаляет их коммерческие данные и историю.
+
+Разрешённые переходы `product`:
+
+```text
+template <-> draft
+draft -> published
+template | draft | published -> archived
+archived -> draft
+```
+
+- Копирование `template` не является переходом исходного товара и всегда создаёт новый `draft`.
+- `published` на текущем этапе редактируется обычной versioned update-командой; успешное изменение
+  сразу публикует integration event. Staged revisions, если понадобятся, проектируются отдельно.
+- `ready` не является статусом. Готовность вычисляется из правил валидации и возвращается как
+  результат проверки вместе со списком причин.
+- Переход в `published` является явным решением пользователя. Backend не блокирует его проверками
+  completeness сверх структурной валидации DTO и целостности ссылок. Readiness носит
+  рекомендательный характер и не управляет lifecycle автоматически.
+- Отсутствие или изменение данных не переводит Product между статусами автоматически.
+- `active` и `disabled` не принадлежат lifecycle каталожного товара: коммерческой активностью
+  владеет `store_srv`.
+- Пользовательское удаление не делает физический `DELETE`, а переводит товар в `archived`,
+  увеличивает `version` и публикует событие с новым `status`.
 - Физическое удаление допустимо только как отдельный purge/cleanup-процесс вне пользовательского
   lifecycle.
-- Consumer должен применять статус из `payload.status` как источник истины. Имя события может
-  использоваться только как fallback для старых сообщений без `status`.
+- Consumer применяет `payload.status` как источник истины. Имя события используется только как
+  fallback для старых сообщений без явного `status`.
+- Product и Variant больше не используют общий `CatalogStatus`. Для Variant вводится отдельный
+  `VariantStatus`: `current` и `archived`.
+- `current` означает, что Variant входит в текущую структуру Product; он не означает продажу или
+  показ на витрине. Разрешены переходы `current <-> archived`.
+- Архив Variant глобально блокирует связанные Offers через snapshot-фильтр, не меняя их Store-
+  статусы. Восстановление в `current` может снова сделать сохранённые active Offers эффективными,
+  поэтому Admin предупреждает пользователя о таком последствии, но не выполняет автоматических
+  status transitions.
 
 Версионность update-команд:
 
@@ -166,6 +198,21 @@ Lifecycle-правило:
 - Repository update обязан проверять `version` в транзакции и возвращать `409 Conflict`, если
   запись была изменена другим запросом.
 - Gateway и frontend обязаны прокидывать `version` из загруженной entity в update-команду.
+
+Контракт смены статуса:
+
+- Обычные create/update DTO не принимают произвольный `status` вместе с содержимым сущности.
+- Каждый самостоятельный aggregate предоставляет versioned-команду `changeStatus` с полями
+  `uuid`, `version`, `status`.
+- Команда проверяет только существование aggregate, expected version и разрешённость перехода по
+  утверждённой матрице. Completeness, цена, inventory и другие вычисляемые условия не выполняют
+  автоматический transition и не являются скрытым status guard.
+- Смена статуса, увеличение `version` и запись outbox event выполняются в одной транзакции.
+- Integration event имеет тип `<aggregate>.status.changed`, а payload содержит как минимум
+  `previousStatus`, `status` и поля минимального snapshot этого aggregate.
+- Consumers применяют `payload.status`; название события не используется как источник состояния.
+- `product.create` создаёт `draft`; перевод в `template` выполняется отдельной `changeStatus`.
+- `store_product` и `store_offer` создаются как `disabled` независимо от входного UI state.
 
 ## Shop Service
 
@@ -242,6 +289,83 @@ Offer -> InventoryMovement
 `Offer` не является nullable-добавкой к `variant`. Если вариант еще не продается в магазине, для
 него просто нет `offer`. Если `offer` существует, он обязан ссылаться на конкретный `variant`.
 
+Lifecycle `store_product` и `store_offer`:
+
+- `disabled` — сущность настроена, но временно выключена на витрине;
+- `active` — сущность включена на витрине, если также выполнены остальные sellability-условия;
+- `archived` — сущность убрана из рабочего ассортимента, скрыта из обычных Admin-списков, но её
+  цены, остатки, резервы и история сохранены.
+
+Разрешённые переходы Store:
+
+```text
+disabled <-> active
+disabled | active -> archived
+archived -> disabled
+```
+
+- Новый `store_product` и новый `store_offer` всегда создаются в `disabled`. Активация выполняется
+  отдельным явным действием менеджера.
+- Восстановление из `archived` всегда возвращает сущность в `disabled`, но не включает её на
+  витрине автоматически.
+- Восстановление `store_product` не восстанавливает и не активирует его offers автоматически:
+  каждый `store_offer` восстанавливается отдельно в `disabled`.
+- Поле `showing` исключается из целевой модели как дубликат статуса. `active` заменяет комбинацию
+  прежних `status = active` и `showing = true`; `disabled` заменяет выключенный `showing`.
+- `active` не гарантирует возможность покупки: цена, остаток, исходные snapshots и активность
+  магазина проверяются отдельно.
+- Переход в `active` не требует наличия цены, положительного остатка или active Offers у
+  StoreProduct. Это явное решение пользователя; backend проверяет только допустимость перехода,
+  optimistic version и существование самой сущности.
+- Цена и inventory не управляют lifecycle автоматически. Текущий Store contract сохраняет Offer
+  вместе с ценой, а нулевой остаток остаётся отдельным коммерческим состоянием.
+- Изменение source snapshot или отключение Shop не меняет Store-статусы автоматически: публичная
+  выборка применяет source status как отдельный обязательный фильтр.
+- `store_product.disabled` блокирует все его offers; `store_offer.disabled` блокирует только одну
+  продаваемую позицию.
+- `product_snapshot.status = archived` глобально блокирует продажу независимо от сохранённых
+  Store-статусов. Восстановление Product в `draft` не снимает блокировку; требуется повторный
+  переход Product в `published`.
+
+Условие включения позиции в витрину:
+
+```text
+shop_snapshot.status = active
+AND product_snapshot.status = published
+AND variant_snapshot.status = current
+AND store_product.status = active
+AND store_offer.status = active
+```
+
+Цена и доступный остаток возвращаются как данные Offer и не изменяют lifecycle. Правила отображения
+товара без остатка и будущая работа с периодами действия цен проектируются отдельно от статусов.
+
+Обычные Admin-списки исключают `archived`. Product, StoreProduct и Offer в архиве доступны в
+отдельном разделе, где пользователь может просмотреть их и выполнить разрешённое восстановление.
+
+Миграция текущих статусов:
+
+1. В `product_srv` ввести отдельный `ProductStatus`; значение `active` мигрировать в
+   `published`, `archived` оставить без изменения, а `disabled` безопасно мигрировать в `draft`
+   для последующей ручной проверки и публикации.
+2. Default нового Product изменить с `active` на `draft`. `template` назначается только явной
+   командой пользователя.
+3. Общий `catalog_status_enum` разделить на `ProductStatus` и `VariantStatus`. Variant `active`
+   мигрировать в `current`, `archived` оставить, а legacy `disabled` безопасно мигрировать в
+   `archived` с возможностью явного восстановления пользователем.
+4. В `store_product` и `store_offer`: `archived` оставить; текущий `disabled` оставить; комбинацию
+   `active + showing = true` мигрировать в `active`; `active + showing = false` мигрировать в
+   `disabled`.
+5. После миграции удалить `showing` из Store tables, DTO, entities, gateway contracts и Admin UI.
+6. Пересобрать `product_snapshot` событиями или reconciliation так, чтобы Store видел
+   `published`, `draft`, `template`, `archived`; команды создания StoreProduct принимают только
+   `published`.
+7. Публичные Store-запросы заменить с проверки `product_snapshot.status = active` на
+   `product_snapshot.status = published` и убрать проверки `showing`.
+8. На время rolling migration readers могут принимать старое `active` как alias `published`, но
+   writers после cutover обязаны писать только новую модель. Compatibility alias удаляется после
+   пересборки snapshots и обновления всех consumers.
+
 ## Admin Gateway Read Model
 
 `store_srv` может хранить локальные `shop_snapshot`, `product_snapshot`, `variant_snapshot` только
@@ -291,7 +415,6 @@ domain service outbox event
   "uuid": "store-product-uuid",
   "version": 4,
   "status": "active",
-  "showing": true,
   "article": "TSHIRT-BASE",
   "createdAt": "2026-06-28T16:10:00.000Z",
   "updatedAt": "2026-06-28T16:20:00.000Z",
@@ -305,7 +428,7 @@ domain service outbox event
   "product": {
     "uuid": "product-uuid",
     "name": "Футболка базовая",
-    "status": "active",
+    "status": "published",
     "brand": {
       "uuid": "brand-uuid",
       "name": "Sellgar",
@@ -327,7 +450,6 @@ domain service outbox event
       "uuid": "offer-uuid",
       "version": 3,
       "status": "active",
-      "showing": true,
       "article": "TSHIRT-BLACK-M",
       "createdAt": "2026-06-28T16:10:00.000Z",
       "updatedAt": "2026-06-28T16:20:00.000Z",
@@ -376,7 +498,6 @@ store_product
   product_uuid external id -> product_srv.product.uuid
   article
   status
-  showing
   created_at
   updated_at
 
@@ -388,7 +509,6 @@ store_offer
   variant_uuid
   article
   status
-  showing
   created_at
   updated_at
 
