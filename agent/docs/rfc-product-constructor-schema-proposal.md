@@ -95,27 +95,27 @@ unit ← property → property_option → option_extra → image
 
 | Таблица | Основные поля / ключ |
 |---|---|
-| `product_type` | `id PK`, `name` |
+| `product_type` | `uuid PK`, `name` |
 | `type_product_property` | PK `(type_id, property_code)` |
 | `type_variant_property` | PK `(type_id, property_code)` |
-| `product` | `code PK`, `type_id FK`, `brand_code FK`, `name`, `description`, экспериментальный `archived_at` |
-| `variant` | `code PK`, `product_code`, `type_id`, `name`, экспериментальный `archived_at` |
-| `product_property` | PK `(product_code, property_code)`, `type_id` |
-| `variant_property` | PK `(variant_code, property_code)`, `type_id` |
-| `product_property_value` | PK `(product_code, property_code, code)`, шесть типизированных столбцов |
-| `variant_property_value` | PK `(variant_code, property_code, code)`, те же столбцы |
+| `product` | `uuid PK`, `type_uuid FK`, `brand_code FK`, `name`, `description`, `status` |
+| `variant` | `uuid PK`, `product_uuid`, `type_uuid`, `name`, `status` |
+| `product_property` | PK `(product_uuid, type_uuid, property_code)` |
+| `variant_property` | PK `(variant_uuid, type_uuid, property_code)` |
+| `product_property_value` | PK `(product_uuid, type_uuid, property_code, position)`, шесть типизированных столбцов |
+| `variant_property_value` | PK `(variant_uuid, type_uuid, property_code, position)`, те же столбцы |
 
 У варианта нет самостоятельно выбранного типа. `variant.type_id` в этом варианте
 схемы — техническое повторение типа его товара, подтвержденное составным FK:
 
 ```text
-variant(product_code, type_id)
-  → product(code, type_id)
+variant(product_uuid, type_uuid)
+  → product(uuid, type_uuid)
 ```
 
 Это позволяет проверить назначение свойства варианту таким же способом, как
 товару. Альтернатива консилиума: убрать `type_id` из Variant и добавить
-`product_code` в его назначения для проверки через Product. Оба варианта
+`product_uuid` в его назначения для проверки через Product. Оба варианта
 возможны; для исполняемого опыта выбран первый.
 
 ### Какие FK действительно запрещают чужое поле
@@ -123,13 +123,13 @@ variant(product_code, type_id)
 У `product_property` две независимые составные связи:
 
 ```text
-(product_code, type_id)    → product(code, type_id)
-(type_id, property_code)   → type_product_property(type_id, property_code)
+(product_uuid, type_uuid)  → product(uuid, type_uuid)
+(type_uuid, property_code) → type_product_property(type_uuid, property_code)
 ```
 
 Первая доказывает тип конкретного товара. Вторая доказывает, что свойство
 включено именно в этот тип на уровне товара. Для варианта используются
-`variant(code, type_id)` и `type_variant_property`.
+`variant(uuid, type_uuid)` и `type_variant_property`.
 
 FK назначения на поле типа имеет `ON DELETE CASCADE`. FK строки значения
 на назначение тоже имеет `ON DELETE CASCADE`.
