@@ -216,47 +216,44 @@ archived -> draft
 
 ## Shop Service
 
-`shop_srv` - источник истины для магазинов/витрин/каналов продаж.
+`shop_srv` - источник истины для сведений о магазине: названия, юридических реквизитов,
+публичных контактов и адресов.
 
-Минимальная целевая таблица:
+Целевые таблицы:
 
 ```text
 shop
   uuid pk
   version
   name
-  status
+  legal_form -- legal_entity | individual_entrepreneur
+  legal_name | entrepreneur_full_name
+  inn, kpp, ogrn, ogrnip
+  legal_address, actual_location
+  email, phone
   created_at
   updated_at
+
+shop_contact
+shop_address
+  shop_uuid fk -> shop.uuid
 ```
 
-Расширения позже:
+Магазин сам является продавцом; отдельного seller aggregate нет. У `shop` нет lifecycle и
+состояния готовности: запись создаётся и далее редактируется с optimistic version. Обязательные
+поля проверяются обычной валидацией входного контракта.
 
-```text
-shop_settings
-  shop_uuid fk -> shop.uuid
-  default_currency_code
-  timezone
-  publication_policy
+Shop и склад не смешиваются. Настройки фискализации и платежей принадлежат соответствующим
+сервисам и в Shop не хранятся.
 
-sales_channel
-  uuid pk
-  shop_uuid fk -> shop.uuid
-  code
-  name
-  status
-```
-
-Пока не нужно смешивать `shop` и склад. Складская модель может появиться отдельно, если остатки
-станут многоскладскими.
+Домены витрины, способы доставки и документы не входят в Shop. Их владельцы и жизненный цикл
+проектируются отдельно при появлении соответствующей задачи.
 
 События:
 
 ```text
 shop.created
 shop.updated
-shop.disabled
-shop.deleted
 ```
 
 ## Store Service
@@ -330,8 +327,7 @@ archived -> disabled
 Условие включения позиции в витрину:
 
 ```text
-shop_snapshot.status = active
-AND product_snapshot.status = published
+product_snapshot.status = published
 AND variant_snapshot.status = current
 AND store_product.status = active
 AND store_offer.status = active
@@ -649,7 +645,7 @@ ubiquitous language. `currency` остается `currency` в любом сер
 
 ```text
 event_uuid
-event_type              -- product.created, variant.updated, shop.archived
+event_type              -- product.created, variant.updated, shop.updated
 schema_version
 producer                -- product_srv, shop_srv, store_srv
 aggregate_type          -- product, variant, shop, store_product, offer, inventory
@@ -962,7 +958,7 @@ archiveStoreProduct(commandId, storeProductUuid, expectedVersion)
 `store_srv` применяет события владельцев так:
 
 ```text
-shop.created / shop.updated / shop.archived
+shop.created / shop.updated
   -> upsert shop_snapshot
 
 product.created / product.updated / product.archived
