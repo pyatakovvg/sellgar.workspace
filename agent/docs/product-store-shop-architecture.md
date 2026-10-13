@@ -1,5 +1,14 @@
 # Product, Shop, Store Architecture
 
+> Уточнение 2026-10-12: учет внутри связи Store–Variant заменен учетными записями
+> с индивидуальным артикулом, коллекцией текстовых уточнений и собственными
+> остатками. Старые описания offer_inventory и offerUuid для складских команд
+> ниже относятся к предыдущей модели. Принятые решения: [RFC конструктора](rfc-product-constructor.md);
+> текущие таблицы, API и миграции: [Store README](../../backend/service/sellgar.store.service/README.md).
+> Каталог Store теперь потребляет из product_srv_v2 (события schemaVersion=3).
+> По согласованию bootstrap Store использует один Nest-контекст и две RMQ-очереди,
+> без HTTP listen; inbox/outbox остаются транзакционными.
+
 - Статус: draft
 - Назначение: целевая модель разделения `sellgar.product.service`, `sellgar.shop.service` и
   `sellgar.store.service`.
