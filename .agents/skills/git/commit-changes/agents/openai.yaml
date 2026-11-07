@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git — commit и push"
+  short_description: "Подготовить commit scope и опубликовать изменения"
+  default_prompt: "Используй $commit-changes для текущего запроса; подключи применимые правила и покажи проверяемый результат."

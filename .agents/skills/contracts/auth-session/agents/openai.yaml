@@ -1,0 +1,4 @@
+interface:
+  display_name: "Контракты — auth и session"
+  short_description: "Проследить вход, renew и восстановление session"
+  default_prompt: "Используй $auth-session для текущего запроса; подключи применимые правила и покажи проверяемый результат."

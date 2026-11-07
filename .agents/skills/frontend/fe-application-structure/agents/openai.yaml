@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend — границы приложения"
+  short_description: "Определить владельцев, view и поток данных"
+  default_prompt: "Используй $fe-application-structure для текущего запроса; подключи применимые правила и покажи проверяемый результат."

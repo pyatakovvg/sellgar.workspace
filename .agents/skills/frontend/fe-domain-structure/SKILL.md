@@ -25,6 +25,10 @@ description: >-
 - Фиксируй противоречие кода или документации с `SKILL.md` как ошибку проекта.
 - Не ослабляй правило ссылкой на legacy-код, локальное соглашение или migration plan.
 
+## Связанные правила
+
+Оформление проверяй по [code-formatting](../../engineering/code-formatting/SKILL.md). Сценарную композицию и framework use cases — по [fe-application-structure](../fe-application-structure/SKILL.md) и [fe-module-create](../fe-module-create/SKILL.md); они не меняют владельца domain-контракта.
+
 ## Алгоритм
 
 Выполняй шаги строго по порядку:

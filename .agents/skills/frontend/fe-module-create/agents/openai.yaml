@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend — framework-единица"
+  short_description: "Собрать declaration, controller, bindings и view"
+  default_prompt: "Используй $fe-module-create для текущего запроса; подключи применимые правила и покажи проверяемый результат."

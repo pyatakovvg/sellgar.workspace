@@ -9,6 +9,10 @@
 - какой минимальный набор документов читать под тип задачи;
 - какие проверки запускать перед завершением работы.
 
+## Группы Скилов
+
+Выбор сценарной группы и проектных источников: [agent/skill-routing.md](agent/skill-routing.md). Общие скилы не содержат названий Sellgar repositories, ports, package scripts или API внутренних framework-библиотек. Эти сведения читаются из документов ниже и ближайшего `AGENTS.md`.
+
 ## Перед Редактированием
 
 - Определи тип задачи и целевые submodules.
@@ -21,6 +25,7 @@
 
 | Если задача про | Читать сначала | Затем проверить |
 |---|---|---|
+| Группа скилов: Git, разработка, аудит, runtime | [agent/skill-routing.md](agent/skill-routing.md) | выбранный workflow и стандарты затронутого слоя |
 | Agent task scope, реализация, closeout | [agent/task-contract.md](agent/task-contract.md) | [agent/closeout-gates.md](agent/closeout-gates.md) |
 | Submodules, detached state, sync с `origin/master` | [submodules-workflow.md](submodules-workflow.md) | `./agent/scripts/status-all.sh` |
 | Локальный запуск, health-check, dev services | [dev-modes.md](dev-modes.md) | [dev-command-matrix.md](dev-command-matrix.md) |
@@ -39,7 +44,7 @@
 | Media service | `backend/service/sellgar.media.service/AGENTS.md` | media upload/CDN/MinIO smoke |
 | Admin frontend | `frontend/sellgar.ui.admin/AGENTS.md` | browser/manual smoke + frontend build |
 | UI kit | `frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md` | storybook/build checks |
-| Desktop UI | nearest `AGENTS.md`, если появится | package-local build/run |
+| Desktop UI | `frontend/sellgar.ui.desktop/AGENTS.md` | package-local build/run |
 | Mobile shop application | `frontend/sellgar.mobile.shop/AGENTS.md` | package-local build/run + device smoke |
 | Mobile app | nearest `AGENTS.md`, если появится | package-local build/run |
 
@@ -61,7 +66,7 @@ Frontend:
 
 - `frontend/sellgar.ui.admin/AGENTS.md`
 - `frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md`
-- `frontend/sellgar.ui.desktop/AGENTS.md`, если будет добавлен
+- `frontend/sellgar.ui.desktop/AGENTS.md`
 
 Mobile:
 
@@ -87,11 +92,7 @@ git status --short --branch
 git submodule status
 ```
 
-Для runtime-задач дополнительно:
-
-```bash
-./agent/scripts/health-check.sh full
-```
+Для runtime-задач проверяй readiness запускаемых компонентов и выбирай health/smoke profile по сценарию из [dev-modes.md](dev-modes.md). Полный `./agent/scripts/health-check.sh full` нужен при широком smoke либо когда он необходим для acceptance; обычный запуск не требует полного тестирования всех сервисов.
 
 ## Правила Навигации
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Контракты — сервисы и события"
+  short_description: "Проверить ownership и producer/consumer flow"
+  default_prompt: "Используй $service-contracts для текущего запроса; подключи применимые правила и покажи проверяемый результат."

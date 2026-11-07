@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git — полный workflow"
+  short_description: "Выполнить commit, push и цепочку gitlinks"
+  default_prompt: "Используй $git-workflow для текущего запроса; подключи применимые правила и покажи проверяемый результат."

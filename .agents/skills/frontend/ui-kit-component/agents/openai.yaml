@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend — UI kit"
+  short_description: "Изменить общий kit API и визуальные состояния"
+  default_prompt: "Используй $ui-kit-component для текущего запроса; подключи применимые правила и покажи проверяемый результат."

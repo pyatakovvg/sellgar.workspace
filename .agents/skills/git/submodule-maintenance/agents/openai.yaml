@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git — submodules и gitlinks"
+  short_description: "Проверить и обновить вложенные Git-ссылки"
+  default_prompt: "Используй $submodule-maintenance для текущего запроса; подключи применимые правила и покажи проверяемый результат."
