@@ -32,6 +32,9 @@
 | Frontend-документация, правила разработки | [../frontend/README.md](../frontend/README.md) | тематический документ из `agent/frontend` |
 | Product/Store/Shop архитектура, цены, остатки | [product-store-shop-architecture.md](product-store-shop-architecture.md) | affected service `AGENTS.md` |
 | RFC конструктора товаров, примитивы и детализация учета | [rfc-product-constructor.md](rfc-product-constructor.md) | принятые решения и открытые вопросы RFC |
+| RFC корзины, оформления заказа и платежей без Billing | [rfc-commerce-checkout-payments.md](rfc-commerce-checkout-payments.md) | границы сервисов, операции, статистика и открытые решения |
+| Общая гостевая сессия, жизненный цикл Identity и bootstrap витрины | [guest-sessions.md](guest-sessions.md) | проверки Identity/Client/Socket, браузер витрины и изолированный smoke |
+| Client Cart, приватная доставка Socket и проверка связки шлюзов | [cart-gateway-integration.md](cart-gateway-integration.md) | README затронутых gateway/Identity и полный изолированный smoke |
 | Backlog commerce admin и решение по новым сервисам | [admin-commerce-backlog.md](admin-commerce-backlog.md) | [product-store-shop-architecture.md](product-store-shop-architecture.md) |
 | Admin gateway | `backend/gateway/sellgar.admin.gateway/AGENTS.md` | build/run/smoke из [dev-command-matrix.md](dev-command-matrix.md) |
 | Client gateway | `backend/gateway/sellgar.client.gateway/AGENTS.md` | build/run/smoke из [dev-command-matrix.md](dev-command-matrix.md) |
@@ -39,6 +42,7 @@
 | Identity service | `backend/service/sellgar.identity.service/AGENTS.md` | build/run/smoke из [dev-command-matrix.md](dev-command-matrix.md) |
 | Product service | `backend/service/sellgar.product.service/AGENTS.md` | product contract smoke, особенно images/variants |
 | Store service | `backend/service/sellgar.store.service/AGENTS.md` | sellable product design/build |
+| Cart service | `backend/service/sellgar.cart.service/AGENTS.md` | build, PostgreSQL integration и изолированный RMQ smoke |
 | Shop service | `backend/service/sellgar.shop.service/AGENTS.md` | shop/channel design/build |
 | File service | `backend/service/sellgar.file.service/AGENTS.md` | file metadata API smoke |
 | Media service | `backend/service/sellgar.media.service/AGENTS.md` | media upload/CDN/MinIO smoke |
@@ -58,6 +62,7 @@ Backend:
 - `backend/service/sellgar.identity.service/AGENTS.md`
 - `backend/service/sellgar.product.service/AGENTS.md`
 - `backend/service/sellgar.store.service/AGENTS.md`
+- `backend/service/sellgar.cart.service/AGENTS.md`
 - `backend/service/sellgar.shop.service/AGENTS.md`
 - `backend/service/sellgar.file.service/AGENTS.md`
 - `backend/service/sellgar.media.service/AGENTS.md`

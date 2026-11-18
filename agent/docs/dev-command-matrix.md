@@ -122,6 +122,26 @@ yarn start:dev
 
 Сервис подготовлен как RMQ-only scaffold. Таблицы `store_product`, `store_variant`, price history, inventory и reservation проектировать до реализации.
 
+### Cart Service
+
+Рабочая директория: `backend/service/sellgar.cart.service`.
+
+```bash
+yarn migration:run
+yarn build
+yarn test --runInBand
+yarn test:integration
+yarn test:smoke
+yarn start:dev
+```
+
+RMQ-only: `cart_srv.command.queue`, `cart_srv.event.queue`, health command
+`cart.health`; HTTP listen отсутствует. Отдельная PostgreSQL база `cart_srv`.
+Bootstrap читает Store/Product/Shop, проекции обновляются событиями владельцев.
+Integration/smoke создают только собственные случайные схемы; smoke также
+использует изолированные очереди/exchange. Детали команд, доверенного ownerUuid
+и оставшихся интеграций: [Cart README](../../backend/service/sellgar.cart.service/README.md).
+
 ### Shop Service
 
 Рабочая директория:
@@ -246,3 +266,17 @@ yarn android:mobile
 ```
 
 Если automated test не покрывает behavior, в финальном ответе указывай manual/browser smoke: URL, шаги, результат и residual risk.
+
+## Полный smoke клиентской корзины и приватных сокетов
+
+После сборки Identity, Cart, Client Gateway и Socket Gateway из workspace:
+
+```bash
+node agent/scripts/smoke-client-cart-socket.cjs
+```
+
+Нужны установленные зависимости четырех backend repositories и socket.io-client
+из admin frontend, локальные PostgreSQL/RabbitMQ и работающие Shop/Product/Store.
+Проверка использует случайные схемы, пользователей и очереди, читает исходные
+товары без изменений; проверяет login/renew/logout, HTTP Cart, private live/replay,
+ACK, несколько сессий аккаунта и изоляцию владельцев. Ресурсы удаляются после smoke.

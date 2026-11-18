@@ -746,17 +746,26 @@ if incoming aggregate_version == current snapshot source_version + 1:
 if incoming aggregate_version > current snapshot source_version + 1:
   write sync_issue
   do not apply blindly
-  ack only after issue is persisted
+  recover the full Product aggregate from its owner
+  resolve covered issues and parked inbox entries in the snapshot transaction
+  ack only after recovery succeeds; nack/requeue on failure
 ```
 
 `ack` в RabbitMQ выполняется только после commit локальной транзакции. Если обработчик упал до
 commit, сообщение должно быть доставлено повторно, а `inbox_event` защищает от дублей.
+Для текущего Product schemaVersion=3 восстановление выполняет существующий
+`CatalogSyncService`. Повтор parked-события снова запускает восстановление, даже
+если недостающий предшественник уже пришёл. Для других producers эта автоматическая
+стратегия не реализована; сохранённый `sync_issue` требует отдельного reconciliation.
 
 ### Текущее внедрение в Sellgar
 
-На текущем этапе механизм transactional outbox вынесен в отдельную библиотеку
-`sellgar.outbox.library` и подключен в `sellgar.product.service` как nested
-submodule внутри service-local monorepo:
+Механизм transactional outbox принадлежит одной библиотеке `sellgar.outbox.library`
+(`@sellgar/outbox`). Product, Shop, Store и Cart подключают этот repository как
+nested submodule `library/sellgar.outbox.library` и workspace-зависимость. Их
+собственные relay/repository не содержат копий общей логики; Store и Cart таких
+реализаций больше не имеют. При публикации библиотеки gitlinks всех четырёх
+потребителей обновляются на один commit, child → parents → workspace.
 
 ```text
 sellgar.product.service/
@@ -774,6 +783,35 @@ sellgar.product.service/
 - recovery зависших `processing` записей;
 - publish timeout;
 - metrics по pending/failed/processing.
+
+OutboxModule регистрируется один раз в Nest-контексте с producer и DI token
+глобального RabbitMQ ClientProxy. Библиотека использует DataSource сервиса и
+переданный EntityManager; своего соединения или отдельного процесса не создаёт.
+Схема и миграции остаются у сервиса. Build потребителя сначала собирает библиотеку.
+
+Совместимость существующих таблиц и событий задаётся явными binding options:
+
+| Потребители | Колонка ID | Producer в таблице | Версия | Поле envelope | Исчерпанные попытки |
+| --- | --- | --- | --- | --- | --- |
+| Product, Shop | aggregate_id | да | int / number | aggregateId | failed |
+| Store | aggregate_uuid | да | int / number | aggregateUuid | dead |
+| Cart | aggregate_uuid | нет, берётся из options | bigint / string | aggregateUuid | dead |
+
+Writer формирует SQL внутри переданной транзакции, не регистрируя каноническую
+ORM entity поверх другой схемы. Cart bigint не преобразуется в number. Payload
+и schemaVersion задаёт доменный writer сервиса. Публичные события не переименовываются.
+
+Identity использует отдельный outbox закрытия владельцев: owner_uuid уникален,
+на владельца допускается одно событие. Зависимой последовательности версий там нет;
+это не потребитель данного versioned aggregate-механизма.
+
+Порядок публикации одного `(producer, aggregateType, aggregateId)` задаёт
+`aggregateVersion`. Claim исключает событие, пока существует меньшая неопубликованная
+версия того же агрегата, включая `processing`, backoff и исчерпанные retry. Это
+предотвращает обгон при нескольких relay. Другие агрегаты продолжают работу.
+Timestamp определяет только очередность независимых агрегатов; порядок
+`UPDATE RETURNING` сам по себе не гарантирован. Relay повторяет claim после публикации
+в пределах общего batchSize, чтобы последовательные версии не ждали отдельного тика.
 
 Доменные сервисы по-прежнему владеют именами событий, payload, версиями агрегатов
 и тем, в какой транзакции событие должно быть записано. Product service должен
@@ -1004,6 +1042,16 @@ store_product
 дубликатом каталога и нарушает границу ownership.
 
 ## Cart And Order Boundary
+
+Актуальная целевая схема и открытые решения вынесены в
+[RFC корзины, оформления заказа и платежей](rfc-commerce-checkout-payments.md).
+По решению от 2026-11-16 корзина принадлежит паре «аккаунт или гостевая сессия + магазин»;
+одно оформление выбранных позиций создает один заказ этого магазина.
+В Cart владелец хранится одним owner_uuid из проверенного контекста Identity;
+активная корзина уникальна по (owner_uuid, shop_uuid).
+Магазины — точки единого владельца; общей корзины разных магазинов нет.
+Набросок ниже исторический: он не задает действующий контракт корзины;
+покупаемая позиция в новом проектировании идентифицирует учетную запись Store.
 
 `cart_srv` и `order_srv` не должны жить в `store_srv`.
 

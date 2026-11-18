@@ -50,3 +50,7 @@
 	path = frontend/sellgar.mobile.shop
 	url = git@github.com:pyatakovvg/sellgar.mobile.shop.git
 	branch = main
+[submodule "backend/service/sellgar.cart.service"]
+	path = backend/service/sellgar.cart.service
+	url = git@github.com:pyatakovvg/sellgar.cart.service.git
+	branch = master
