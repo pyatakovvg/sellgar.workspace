@@ -250,3 +250,36 @@ service deployments.
 Internal application HTTP ports are standardized on 8080 for every Kubernetes
 environment, including Services, containers, probes and internal API URLs.
 Public Ingress remains on HTTP/HTTPS; infrastructure protocols retain their ports.
+
+## Identity rollout (2026-11-19)
+
+- Identity follows the same CI → GHCR digest → Argo CD scheme. Source/config are
+  in `backend/service/sellgar.identity.service/code` and service-owned `helm/`.
+- `dev-identity-service` uses one replica, internal HTTP 8080 and no Ingress;
+  domain commands remain in `identity_srv_command_queue` on RabbitMQ.
+- CloudNativePG manages separate `identity_srv` database/login from
+  `identity-database` Secret; database reclaim policy retains data. Identity keys
+  live in `identity-auth`; existing platform Secrets are preserved.
+- Migration Sync hook applies six migrations, including initial base-table
+  creation for empty installations, before Deployment. Synchronize is disabled.
+- Fresh deployment except the explicitly requested base administrator and person
+  profile imported from local Identity. Previous sessions and other local data
+  are not imported. Legacy password HMAC key retains credential compatibility;
+  session/fingerprint keys are newly generated.
+- CI checks unit tests, empty database + repeat migrations, RMQ guest lifecycle
+  and readiness loss after broker disconnect. `/health` checks DB and RMQ consumer.
+- Prod is still not deployed. Product/Store/Cart and remaining domain services
+  are subsequent stages; catalog/cart remain unavailable until they are connected.
+- Infrastructure specifics: `infrastructure/sellgar.infrastructure/docs/identity-service.md`.
+
+Identity acceptance: CI run `44604246244` passed build/smoke/publish; deployed
+source `542f1b8b5fa3fdcb87decba024d54eaf812bf34a`, image digest
+`sha256:afc69bab1c258975889e8bdd6ab47cb8412950df1e3bedde2552806af046afad`.
+All six migrations are recorded; base admin and one profile imported with
+matching credential hash/key. All dev Applications are Synced/Healthy; Identity
+Deployment is 1/1 with internal Service 8080. Actual Client gateway HTTP checked
+guest initialize 201 + HttpOnly cookie, current 200, wrong device 401, invalid
+login 401 preserving guest, logout 201 and subsequent current 401. Temporary
+verification sessions were removed; real newly created dev sessions remain.
+Personal PostgreSQL user `sellgar` also has access to `identity_srv` through the
+existing localhost tunnel, using its own credential (not the app credential).

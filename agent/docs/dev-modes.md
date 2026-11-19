@@ -33,7 +33,7 @@ Build доказывает только компиляцию. Для задач 
 - какой результат увиден;
 - что осталось непроверенным.
 
-`sellgar.identity.service` и `sellgar.product.service` сейчас работают как RMQ-only сервисы и не дают HTTP `/health`. Их работоспособность проверяется через успешный запуск, логи подписки на очередь и сценарий через gateway/frontend.
+`sellgar.identity.service` принимает доменные команды через RMQ; внутренний HTTP `/health` на `PORT` (default 8080) проверяет PostgreSQL и RMQ consumer. `sellgar.product.service` пока RMQ-only и не даёт HTTP `/health`. Для обоих нужны логи подписки на очередь и сценарий через gateway/frontend.
 
 `sellgar.store.service` и `sellgar.shop.service` также подготовлены как RMQ-only scaffolds. До проектирования доменной схемы проверять только Yarn/build/bootstrap.
 

@@ -11,7 +11,7 @@ usage() {
   frontend        Проверить admin UI dev server.
   admin-gateway   Проверить admin gateway.
   socket-gateway  Проверить socket gateway.
-  identity        Напомнить, что identity service RMQ-only и не имеет HTTP health.
+  identity        Проверить внутренний HTTP health Identity service.
   product         Напомнить, что product service RMQ-only и не имеет HTTP health.
   store           Напомнить, что store service RMQ-only и не имеет HTTP health.
   shop            Напомнить, что shop service RMQ-only и не имеет HTTP health.
@@ -67,7 +67,7 @@ probe_socket_gateway() {
 }
 
 probe_identity() {
-  echo "[skip] identity: RMQ-only service, HTTP health endpoint is not available"
+  probe_any "identity" "${IDENTITY_HEALTH_URL:-http://localhost:8080/health}" || failed=1
   echo "  verify by service logs and auth/session scenario through admin-gateway"
 }
 

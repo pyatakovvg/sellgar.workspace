@@ -75,18 +75,20 @@ RabbitMQ, валидный short-lived socket ticket и подключение �
 Рабочая директория:
 
 ```bash
-cd backend/service/sellgar.identity.service
+cd backend/service/sellgar.identity.service/code
 ```
 
 Команды:
 
 ```bash
-yarn build
+yarn build:identity_srv
 yarn test
-yarn start:dev
+yarn start:identity_srv.dev
 ```
 
-Сервис сейчас RMQ-only: HTTP port/`/health` не поднимается. Runtime smoke проверять по логам запуска и через gateway/auth сценарий.
+Доменные команды принимаются через RabbitMQ. Внутренний `GET /health` на `PORT`
+(default 8080) проверяет PostgreSQL и RMQ consumer. В Kubernetes нет внешнего Ingress.
+Runtime smoke также проверяет гостевую сессию через Client gateway.
 
 ### Product Service
 
