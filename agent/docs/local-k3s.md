@@ -223,7 +223,7 @@ sudo k3s etcd-snapshot ls
   values. Shared chart remains in infrastructure. Working branch is development.
 - External routing: `http://dev.sellgar.io/api/admin` and `/api/client`, with
   Traefik StripPrefix; `/socket.io/*` retains channel paths. One replica per gateway.
-- Server storefront uses `http://client-gateway` (Service port 80, target port 4030); browser uses public
+- Server storefront uses `http://client-gateway:8080` (Service and target port 8080); browser uses public
   `/api/client`. URL resolution preserves prefixes for requests and file links.
 - Secret bootstrap is `infrastructure/sellgar.infrastructure/bootstrap/dev/`:
   passwords/signing secrets are generated directly in Kubernetes; app ConfigMaps
@@ -246,3 +246,7 @@ required a second attempt after transient `denied`, with Actions Admin access
 already present. Socket physical channel paths pass WebSocket upgrade/auth refusal
 through Traefik; authenticated business flows still require Identity and domain
 service deployments.
+
+Internal application HTTP ports are standardized on 8080 for every Kubernetes
+environment, including Services, containers, probes and internal API URLs.
+Public Ingress remains on HTTP/HTTPS; infrastructure protocols retain their ports.
