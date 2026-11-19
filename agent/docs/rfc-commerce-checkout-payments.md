@@ -1029,8 +1029,8 @@ Socket дает актуализацию при доставке, а не гар
 [live delivery](../../backend/gateway/sellgar.socket.gateway/src/api/v1/delivery/gateway/connection.gateway.ts),
 [replay repository](../../backend/gateway/sellgar.socket.gateway/src/api/v1/delivery/repository/delivery.repository.ts),
 [socket ticket](../../backend/gateway/sellgar.socket.gateway/src/api/v1/delivery/service/socket-ticket.service.ts),
-[category provider](../../frontend/sellgar.ui.admin/providers/category-changes/src/category-changes.provider.ts),
-[Entity update](../../frontend/sellgar.ui.admin/library/sellgar.app.ui/core/reactive/entity/operation/update-entity/update-entity.ts).
+[category provider](../../frontend/sellgar.ui.admin/code/providers/category-changes/src/category-changes.provider.ts),
+[Entity update](../../frontend/sellgar.ui.admin/code/library/sellgar.app.ui/core/reactive/entity/operation/update-entity/update-entity.ts).
 
 #### Проверка будущей реализации
 

@@ -201,13 +201,13 @@ yarn start:dev
 Рабочая директория:
 
 ```bash
-cd frontend/sellgar.ui.admin
+cd frontend/sellgar.ui.admin/code
 ```
 
 Команды:
 
 ```bash
-yarn build
+yarn build:admin_ui
 yarn dev:admin_ui
 ```
 
@@ -218,7 +218,7 @@ yarn dev:admin_ui
 Рабочая директория:
 
 ```bash
-cd frontend/sellgar.ui.admin/library/sellgar.kit.ui
+cd frontend/sellgar.ui.admin/code/library/sellgar.kit.ui
 ```
 
 Команды зависят от package scripts. Перед запуском проверь:

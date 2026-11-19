@@ -330,7 +330,7 @@ async function run() {
   assert.equal(same.uuid, own.uuid);
   assert.notEqual(foreign.uuid, own.uuid);
   const { io } = createRequire(
-    resolve(root, "frontend/sellgar.ui.admin/package.json"),
+    resolve(root, "frontend/sellgar.ui.admin/code/package.json"),
   )("socket.io-client");
   async function connect(who, shortTicket = false) {
     let { ticket } = await http(

@@ -25,7 +25,7 @@
 | Запуск полного Admin stack и отдельных компонентов | [dev-modes](../dev-modes.md), [dev-command-matrix](../dev-command-matrix.md); scripts соответствующих repos |
 | Frontend Admin: host, routes, активный framework и migration state | [AGENTS.md](../../../frontend/sellgar.ui.admin/AGENTS.md), [task-routing](../../../frontend/sellgar.ui.admin/docs/agent/task-routing.md), manifests и реальные entrypoints |
 | Desktop frontend и его nested framework/kit | [AGENTS.md](../../../frontend/sellgar.ui.desktop/AGENTS.md), nearest package instructions и `.gitmodules` |
-| UI kit API, stories и generation | [AGENTS.md](../../../frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md) и ближайшие инструкции выбранного checkout |
+| UI kit API, stories и generation | [AGENTS.md](../../../frontend/sellgar.ui.admin/code/library/sellgar.kit.ui/AGENTS.md) и ближайшие инструкции выбранного checkout |
 | Product/Store/Shop ownership, денежные и event-контракты | [архитектура](../product-store-shop-architecture.md) и AGENTS.md фактического owning service/gateway |
 | Auth/session | AGENTS.md identity service, соответствующего gateway и клиента; их фактические public contracts |
 | Mobile и backend | README и ближайший AGENTS.md соответствующего submodule; web frontend skills к ним не применять |

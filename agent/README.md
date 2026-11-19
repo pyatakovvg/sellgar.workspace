@@ -16,9 +16,9 @@
 | Frontend | `frontend/sellgar.ui.admin` | Admin frontend |
 | Frontend | `frontend/sellgar.ui.desktop` | Desktop UI |
 | Mobile | `frontend/sellgar.mobile.shop` | Mobile shop application |
-| Frontend nested library | `frontend/sellgar.ui.admin/library/sellgar.kit.ui` | UI kit/storybook |
-| Frontend nested library | `frontend/sellgar.ui.admin/library/sellgar.orm.ui` | ORM UI |
-| Shared nested library | `frontend/sellgar.ui.admin/library/sellgar.app.ui` | Universal `@sellgar/app` framework |
+| Frontend nested library | `frontend/sellgar.ui.admin/code/library/sellgar.kit.ui` | UI kit/storybook |
+| Frontend nested library | `frontend/sellgar.ui.admin/code/library/sellgar.orm.ui` | ORM UI |
+| Shared nested library | `frontend/sellgar.ui.admin/code/library/sellgar.app.ui` | Universal `@sellgar/app` framework |
 | Shared nested library | `frontend/sellgar.mobile.shop/library/sellgar.app.ui` | The same `@sellgar/app` framework commit |
 | Mobile | `mobile/sellgar.mobile` | Mobile app |
 

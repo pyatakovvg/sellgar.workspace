@@ -29,6 +29,7 @@
 | Agent task scope, реализация, closeout | [agent/task-contract.md](agent/task-contract.md) | [agent/closeout-gates.md](agent/closeout-gates.md) |
 | Submodules, detached state, sync с `origin/master` | [submodules-workflow.md](submodules-workflow.md) | `./agent/scripts/status-all.sh` |
 | Локальный запуск, health-check, dev services | [dev-modes.md](dev-modes.md) | [dev-command-matrix.md](dev-command-matrix.md) |
+| Организация деплоя, Helm, среды dev/prod и локальный Kubernetes | [local-k3s.md](local-k3s.md) | размещение charts и конфигурации окружений, доступ к VM и readiness K3s |
 | Frontend-документация, правила разработки | [../frontend/README.md](../frontend/README.md) | тематический документ из `agent/frontend` |
 | Product/Store/Shop архитектура, цены, остатки | [product-store-shop-architecture.md](product-store-shop-architecture.md) | affected service `AGENTS.md` |
 | RFC конструктора товаров, примитивы и детализация учета | [rfc-product-constructor.md](rfc-product-constructor.md) | принятые решения и открытые вопросы RFC |
@@ -47,7 +48,7 @@
 | File service | `backend/service/sellgar.file.service/AGENTS.md` | file metadata API smoke |
 | Media service | `backend/service/sellgar.media.service/AGENTS.md` | media upload/CDN/MinIO smoke |
 | Admin frontend | `frontend/sellgar.ui.admin/AGENTS.md` | browser/manual smoke + frontend build |
-| UI kit | `frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md` | storybook/build checks |
+| UI kit | `frontend/sellgar.ui.admin/code/library/sellgar.kit.ui/AGENTS.md` | storybook/build checks |
 | Desktop UI | `frontend/sellgar.ui.desktop/AGENTS.md` | package-local build/run |
 | Mobile shop application | `frontend/sellgar.mobile.shop/AGENTS.md` | package-local build/run + device smoke |
 | Mobile app | nearest `AGENTS.md`, если появится | package-local build/run |
@@ -70,7 +71,7 @@ Backend:
 Frontend:
 
 - `frontend/sellgar.ui.admin/AGENTS.md`
-- `frontend/sellgar.ui.admin/library/sellgar.kit.ui/AGENTS.md`
+- `frontend/sellgar.ui.admin/code/library/sellgar.kit.ui/AGENTS.md`
 - `frontend/sellgar.ui.desktop/AGENTS.md`
 
 Mobile:

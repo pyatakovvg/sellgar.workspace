@@ -87,7 +87,7 @@ repo_dir() {
       printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin"
       ;;
     sellgar.kit.ui)
-      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin/library/sellgar.kit.ui"
+      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin/code/library/sellgar.kit.ui"
       ;;
     sellgar.ui.desktop)
       printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.desktop"
@@ -96,10 +96,10 @@ repo_dir() {
       printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.mobile.shop"
       ;;
     sellgar.orm.ui)
-      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin/library/sellgar.orm.ui"
+      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin/code/library/sellgar.orm.ui"
       ;;
     sellgar.app.ui)
-      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin/library/sellgar.app.ui"
+      printf '%s\n' "$WORKSPACE_DIR/frontend/sellgar.ui.admin/code/library/sellgar.app.ui"
       ;;
     sellgar.mobile)
       printf '%s\n' "$WORKSPACE_DIR/mobile/sellgar.mobile"
