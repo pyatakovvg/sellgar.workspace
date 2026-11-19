@@ -14,7 +14,7 @@ usage() {
   identity        Проверить внутренний HTTP health Identity service.
   product         Напомнить, что product service RMQ-only и не имеет HTTP health.
   store           Напомнить, что store service RMQ-only и не имеет HTTP health.
-  shop            Напомнить, что shop service RMQ-only и не имеет HTTP health.
+  shop            Проверить внутренний HTTP health Shop service.
   file            Проверить file service.
   media           Проверить media service.
   admin-ui        Проверить admin UI.
@@ -83,7 +83,7 @@ probe_store() {
 }
 
 probe_shop() {
-  echo "[skip] shop: RMQ-only service, HTTP health endpoint is not available"
+  probe_any "shop" "${SHOP_HEALTH_URL:-http://localhost:8080/health}" || failed=1
   echo "  verify by service logs and shop scenario through admin-gateway/admin-ui"
 }
 

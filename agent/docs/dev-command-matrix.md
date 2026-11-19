@@ -149,17 +149,21 @@ Integration/smoke создают только собственные случа�
 Рабочая директория:
 
 ```bash
-cd backend/service/sellgar.shop.service
+cd backend/service/sellgar.shop.service/code
 ```
 
 Команды:
 
 ```bash
 yarn build
-yarn start:dev
+yarn test --runInBand
+yarn start:shop_srv.dev
 ```
 
-Сервис RMQ-only. Сейчас владеет таблицей `shop` и командами `shop.getAll`, `shop.getByUuid`, `shop.create`, `shop.update`.
+Shop владеет магазинами, контактами, адресами и outbox. Доменные команды — RMQ:
+`shop.getAll`, `shop.getByUuid`, `shop.create`, `shop.update`. Внутренний
+`GET /health` на PORT (default 8080) проверяет PostgreSQL и RMQ consumer.
+В Kubernetes внешний Ingress не создаётся.
 
 ### File Service
 

@@ -293,3 +293,40 @@ image `sha256:be998b23a4980c3463cee1757372878a2a604480f329857febc49de05450bdf0`.
 Argo CD rolled out the updated admin gateway. In-app browser login with the
 imported administrator reached `/admin` dashboard and displayed the correct
 profile; the password was not changed or stored in repository files.
+
+## Shop rollout (2026-11-19)
+
+- Shop переведён на принятую структуру `code/`, корневые Dockerfile/CI и
+  service-owned `helm/`. Общий chart остаётся в infrastructure.
+- `dev-shop-service`: одна реплика, внутренний HTTP/Service 8080, без Ingress.
+  Доменные команды остаются в RabbitMQ; внешний API — существующая ветка
+  `/v2/shops` Admin gateway.
+- CloudNativePG создал отдельные login/database `shop_srv`, Secret
+  `shop-database`; reclaim policy сохраняет базу. База развёрнута с нуля,
+  локальные магазины не импортированы. Права личного `sellgar` не менялись.
+- Migration Sync Job применяет девять миграций перед Deployment, synchronize
+  отключён. `.env` поступает из ConfigMap, пароли — через Secret env refs.
+- `@sellgar/outbox` собирается и входит в runtime-образ как библиотека процесса
+  Shop. Отдельный сервис или копия реализации outbox не создавались.
+- CI `44609854076` успешно завершил build/smoke/publish. Source:
+  `bbe16ca9b2c757951dcedd32d80d249ec2a54348`; образ:
+  `sha256:eeff8f625e4057b2488e9574d205149e48cc878fe7c30119cafddc52d623ec0b`.
+- Проверены 53 unit-теста; 11 DB integration-тестов пропущены без их env-флага.
+  Отдельный image smoke с пустыми PostgreSQL/RabbitMQ проверил все миграции и
+  повторный запуск, RMQ create/read/update/search, ответы 400/409 и публикацию
+  `shop.created` → `shop.updated` с версиями 1 → 2. Остановка проверочного
+  RabbitMQ переводила health в 503. Рабочие volumes не использовались.
+- Argo CD: Synced/Healthy; Shop Deployment 1/1. Prod остаётся не развёрнутым.
+  Детали: `infrastructure/sellgar.infrastructure/docs/shop-service.md`.
+
+Браузерная проверка `/admin/shops`: создан `Магазин разработки`
+(`9b17e18c-913c-4fea-b311-e63bda0f3790`) с явно тестовыми реквизитами, затем
+повторно открыт из списка после перезагрузки страницы. Обнаруженный блокирующий
+дефект формы `Missing uuid` исправлен в админке: create route теперь создаёт
+магазин, edit route сохраняет прежнюю семантику обновления. Все 16 тестов формы
+и сборка админки прошли; CI `44612347757` также завершился успешно. Source
+админки `bcfbcea9ca44663235f9cd6e01713e050a6ad83f`, digest
+`sha256:6e2a5b074898ebf646de8234cc649f522bbd8b7019d29017eb7418f243c5febe`.
+Оставшийся frontend-дефект: список магазинов не получает новую строку сразу
+после закрытия формы, пока страницу не обновить. Автоматическая синхронизация
+списка требует отдельной доработки; backend-запись и повторное чтение проверены.
