@@ -2,16 +2,19 @@
 
 - Назначение: запускать инфраструктуру деплоя Sellgar в отдельной VM, используя K3s.
 - Область выполненных шагов: установка Kubernetes, доступ к API, проверка базовых
-  компонентов и подготовка образов общей инфраструктуры.
+  компонентов, подготовка образов общей инфраструктуры и dev-деплой админки.
 
 ## Принятая организация репозиториев
 
-Решение принято пользователем 18 ноября 2026 года.
+Уточнение пользователя 19 ноября 2026 года по примеру
+`payment-terminal.app.ui/helm`: в репозитории приложения находится каталог
+`helm/` рядом с `code/`, содержащий `values.app.yaml`, `dev/values.yaml`
+и `prod/values.yaml`. Параметры ConfigMap, включая содержимое `config.js`,
+задаются в values соответствующей среды. Каталог `deploy/` и собственные
+Kubernetes templates в приложении не создаются.
 
-Helm chart каждого сервиса хранится в его собственном репозитории,
-в `deploy/helm/`. Сервис владеет шаблонами запуска, значениями по умолчанию,
-схемой параметров и специфическими ресурсами, включая Job миграций при необходимости.
-Общая логика шаблонов переиспользуется через версионируемую Helm-библиотеку.
+Общие шаблоны Deployment, Service, Ingress и ConfigMap принадлежат
+переиспользуемому chart `sellgar.infrastructure/charts/application`.
 
 Репозиторий инфраструктуры: `git@github.com:pyatakovvg/sellgar.infrastructure.git`.
 Он хранит желаемое состояние развёртываний и подготовку серверов:
@@ -20,27 +23,28 @@ Helm chart каждого сервиса хранится в его собств
 sellgar.infrastructure/
 ├── ansible/
 ├── bootstrap/
+├── charts/
+│   └── application/
 └── environments/
     ├── dev/
     │   ├── services/
-    │   │   └── cart/
-    │   │       ├── application.yaml
-    │   │       └── values.yaml
+    │   │   └── admin-ui/
+    │   │       └── application.yaml
     │   └── platform/
     └── prod/
         ├── services/
-        │   └── cart/
-        │       ├── application.yaml
-        │       └── values.yaml
+        │   └── .gitkeep
         └── platform/
 ```
 
-`cart/` показывает единый способ размещения конфигурации каждого сервиса.
-`application.yaml` указывает Argo CD источник chart, зафиксированную ревизию
-и namespace назначения. `values.yaml` задаёт параметры окружения: digest образа,
-ресурсы, настройки реплик или autoscaling, домены, подключения и ссылки на Secrets.
-Argo CD получает chart из репозитория сервиса, а значения — из инфраструктурного
-репозитория; копии шаблонов сервиса в инфраструктурном репозитории не создаются.
+`admin-ui/` содержит подключение админки; остальные сервисы подключаются
+по той же схеме. Prod-сервисы пока не подключены.
+`application.yaml` указывает Argo CD источники chart и values, зафиксированные
+ревизии, namespace назначения и выбранный digest образа из CI в Helm parameters.
+Общие values и настройки среды принадлежат приложению; их копии
+в инфраструктурном репозитории не создаются. Argo CD получает общий chart
+из инфраструктуры, а `helm/values.app.yaml` и `helm/<environment>/values.yaml`
+из репозитория приложения.
 
 `platform/` содержит описание общих компонентов: PostgreSQL, RabbitMQ, MinIO, TLS
 и мониторинга. `ansible/` отвечает за подготовку серверов и K3s,
@@ -72,7 +76,12 @@ registries. Все образы закреплены по digest и провер
 Инфраструктурный репозиторий зарегистрирован как submodule workspace.
 Inventory опубликован в `master` и `development`; рабочий checkout использует
 `development`.
-Helm charts, операторы и конфигурация Argo CD пока не реализованы.
+Общий chart приложения подключён через Argo CD v3.6.2. Админка развёрнута
+двумя репликами в `sellgar-dev`, ingress — `http://dev.sellgar.io/admin/`.
+Конфигурация подключения находится в инфраструктуре:
+`environments/dev/services/admin-ui/application.yaml`. Chart, values и образ
+зафиксированы по SHA/digest; CI пока не обновляет инфраструктурный Git автоматически.
+TLS, операторы и deployment остальных сервисов пока не подключены.
 
 ## Виртуальная машина
 
@@ -99,6 +108,12 @@ ssh -i "$VM_STATE/id_ed25519" \
 
 VM запускается вручную через libvirt; автозапуск VM при загрузке хоста не включён.
 Внутри VM сервис K3s должен запускаться через systemd автоматически.
+
+Для доступа к GitHub через VPN хоста MTU интерфейса VM `enp1s0` закреплён
+в 1380; MTU Flannel и новых pod — 1330. Исходник netplan и инструкция
+находятся в `infrastructure/sellgar.infrastructure/bootstrap/local-vm/`
+и `bootstrap/README.md`. После изменения MTU K3s перезапущен с разрешения
+пользователя; готовность узла и Git clone из repo-server проверены.
 
 ## Конфигурация K3s
 
@@ -183,8 +198,9 @@ sudo k3s etcd-snapshot ls
 ## Следующие этапы
 
 Отдельными этапами настраиваются воспроизводимое provisioning через Ansible,
-GitOps через Argo CD, Helm charts, CI и registry, TLS, операторы хранилищ
-и мониторинг. Деплой сервисов Sellgar выполняется после настройки этой цепочки.
+автоматическое обновление инфраструктурного Git из CI, TLS, операторы хранилищ,
+мониторинг и deployment остальных сервисов. GitOps и dev-деплой админки
+уже подключены; детали — в `infrastructure/sellgar.infrastructure/docs/admin-ui.md`.
 
 ## Источники
 
