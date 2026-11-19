@@ -214,3 +214,35 @@ sudo k3s etcd-snapshot ls
 - [Встроенный etcd](https://docs.k3s.io/datastore/ha-embedded)
 - [Доступ к кластеру](https://docs.k3s.io/cluster-access)
 - [Шифрование Secrets](https://docs.k3s.io/security/secrets-encryption)
+
+## Gateway rollout (2026-11-19)
+
+- Scope: Admin/Client/Socket gateway images, CI, Helm values and Ingress, plus
+  PostgreSQL/RabbitMQ/MinIO in the existing dev K3s VM. Fresh PVCs, no host data migration.
+- All application repos own `code/`, root Dockerfile and `.github/`, and `helm/`
+  values. Shared chart remains in infrastructure. Working branch is development.
+- External routing: `http://dev.sellgar.io/api/admin` and `/api/client`, with
+  Traefik StripPrefix; `/socket.io/*` retains channel paths. One replica per gateway.
+- Server storefront uses `http://client-gateway:4030`; browser uses public
+  `/api/client`. URL resolution preserves prefixes for requests and file links.
+- Secret bootstrap is `infrastructure/sellgar.infrastructure/bootstrap/dev/`:
+  passwords/signing secrets are generated directly in Kubernetes; app ConfigMaps
+  contain no secret values. Private images use the `ghcr-pull` Secret.
+- Socket owns database `socket_srv`, schema created by a migration Job before rollout.
+  Business domain services are a separate deployment stage; gateway health alone
+  does not prove catalog, auth, cart or file APIs work end to end.
+
+- Public image URL uses the existing Media `/images/:fileUuid` contract on
+  `http://dev.sellgar.io/images`. Media service/Ingress is not deployed at the
+  gateway stage, so image delivery remains part of the backend rollout.
+
+Verification at rollout: gateway images are tested in isolated containers with
+real RabbitMQ, Socket additionally with PostgreSQL and all six migrations; no
+working host volumes are reused. Client tests pass 44/44, Socket 26/26, frontend
+15/15; Admin has one existing RealtimeController fixture failure (61/62 pass),
+which does not involve modified deployment/health code and is not changed here.
+All three image build/smoke/publish workflows passed; Admin registry publication
+required a second attempt after transient `denied`, with Actions Admin access
+already present. Socket physical channel paths pass WebSocket upgrade/auth refusal
+through Traefik; authenticated business flows still require Identity and domain
+service deployments.

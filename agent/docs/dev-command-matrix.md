@@ -19,14 +19,14 @@ git submodule status
 Рабочая директория:
 
 ```bash
-cd backend/gateway/sellgar.admin.gateway
+cd backend/gateway/sellgar.admin.gateway/code
 ```
 
 Команды:
 
 ```bash
-yarn build
-yarn start:dev
+yarn build:admin_gw
+yarn start:admin_gw.dev
 ```
 
 Ожидаемый локальный порт: `4020`.
@@ -36,7 +36,7 @@ yarn start:dev
 Рабочая директория:
 
 ```bash
-cd backend/gateway/sellgar.client.gateway
+cd backend/gateway/sellgar.client.gateway/code
 ```
 
 Команды:
@@ -54,7 +54,7 @@ yarn start:dev
 Рабочая директория:
 
 ```bash
-cd backend/gateway/sellgar.socket.gateway
+cd backend/gateway/sellgar.socket.gateway/code
 ```
 
 Команды:

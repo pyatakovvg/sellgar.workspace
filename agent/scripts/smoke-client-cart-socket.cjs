@@ -10,8 +10,8 @@ const root = resolve(__dirname, "../..");
 const repos = {
   identity: "backend/service/sellgar.identity.service",
   cart: "backend/service/sellgar.cart.service",
-  client: "backend/gateway/sellgar.client.gateway",
-  socket: "backend/gateway/sellgar.socket.gateway",
+  client: "backend/gateway/sellgar.client.gateway/code",
+  socket: "backend/gateway/sellgar.socket.gateway/code",
 };
 const requires = Object.fromEntries(
   Object.entries(repos).map(([key, path]) => [
