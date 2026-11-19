@@ -78,8 +78,11 @@ Inventory опубликован в `master` и `development`; рабочий ch
 `development`.
 Общий chart приложения подключён через Argo CD v3.6.2. Админка развёрнута
 двумя репликами в `sellgar-dev`, ingress — `http://dev.sellgar.io/admin/`.
-Конфигурация подключения находится в инфраструктуре:
-`environments/dev/services/admin-ui/application.yaml`. Chart, values и образ
+Витрина развёртывается на `http://dev.sellgar.io/` по той же схеме. По решению
+пользователя от 19 ноября 2026 года backend остаётся отдельным этапом:
+до его подключения корень витрины возвращает 503, `/healthz` проверяет Next.js.
+Конфигурация подключений находится в инфраструктуре:
+`environments/dev/services/<admin-ui|storefront>/application.yaml`. Chart, values и образ
 зафиксированы по SHA/digest; CI пока не обновляет инфраструктурный Git автоматически.
 TLS, операторы и deployment остальных сервисов пока не подключены.
 

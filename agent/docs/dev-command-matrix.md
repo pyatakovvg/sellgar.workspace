@@ -232,7 +232,7 @@ yarn run
 Рабочая директория:
 
 ```bash
-cd frontend/sellgar.ui.desktop
+cd frontend/sellgar.ui.desktop/code
 ```
 
 Команды зависят от package scripts. Перед запуском проверь локальный `package.json`.
