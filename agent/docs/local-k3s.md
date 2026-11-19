@@ -283,3 +283,13 @@ login 401 preserving guest, logout 201 and subsequent current 401. Temporary
 verification sessions were removed; real newly created dev sessions remain.
 Personal PostgreSQL user `sellgar` also has access to `identity_srv` through the
 existing localhost tunnel, using its own credential (not the app credential).
+
+Admin browser sign-in was verified after the Identity rollout. The Admin gateway
+Identity command client had its RabbitMQ URLs outside `options`, so Nest ignored
+the configured broker. They now reside in `options.urls`; regression test failed
+before the fix and passes after. All 14 auth/session tests run in the image build.
+CI `44607457600` passed; source `6b642930a68c065ef31e881be22f19aa52a73e71`,
+image `sha256:be998b23a4980c3463cee1757372878a2a604480f329857febc49de05450bdf0`.
+Argo CD rolled out the updated admin gateway. In-app browser login with the
+imported administrator reached `/admin` dashboard and displayed the correct
+profile; the password was not changed or stored in repository files.
