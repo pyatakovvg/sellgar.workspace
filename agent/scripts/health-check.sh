@@ -13,7 +13,7 @@ usage() {
   socket-gateway  Проверить socket gateway.
   identity        Проверить внутренний HTTP health Identity service.
   product         Проверить внутренний HTTP health Product service.
-  store           Напомнить, что store service RMQ-only и не имеет HTTP health.
+  store           Проверить внутренний HTTP health Store service.
   shop            Проверить внутренний HTTP health Shop service.
   file            Проверить file service.
   media           Проверить media service.
@@ -77,7 +77,7 @@ probe_product() {
 }
 
 probe_store() {
-  echo "[skip] store: RMQ-only service, HTTP health endpoint is not available"
+  probe_any "store" "${STORE_HEALTH_URL:-http://localhost:8080/health}" || failed=1
   echo "  verify by service logs and store scenario through admin-gateway/admin-ui"
   echo "  for event flow, check store_srv.inbox_event, variant_snapshot and sync_issue"
 }

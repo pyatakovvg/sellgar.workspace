@@ -223,7 +223,7 @@ Reporting получает факты Order и Payment асинхронно. Е�
   В карточке есть локальный выбор учетной записи.
 
 Источники: [Store README](../../backend/service/sellgar.store.service/README.md),
-[Store models](../../backend/service/sellgar.store.service/src/api/v1/store-product/model),
+[Store models](../../backend/service/sellgar.store.service/code/src/api/v1/store-product/model),
 [Client Products Service](../../backend/gateway/sellgar.client.gateway/src/api/products/v1/products.service.ts),
 [Desktop AGENTS](../../frontend/sellgar.ui.desktop/AGENTS.md).
 Эти факты не подменяют продуктовые решения ниже.
@@ -539,10 +539,10 @@ integration-границу и закрывает корзины прежнего
   `store.product.updated`. Подписки только на Store недостаточно для названий,
   изображений и статусов каталога; нужны события владельцев Product и Shop.
 
-Источники: [Store Product](../../backend/service/sellgar.store.service/src/api/v1/store-product/model/store-product.model.ts),
-[Store Offer](../../backend/service/sellgar.store.service/src/api/v1/store-product/model/store-offer.model.ts),
+Источники: [Store Product](../../backend/service/sellgar.store.service/code/src/api/v1/store-product/model/store-product.model.ts),
+[Store Offer](../../backend/service/sellgar.store.service/code/src/api/v1/store-product/model/store-offer.model.ts),
 [политика Client Gateway](../../backend/gateway/sellgar.client.gateway/src/api/products/v1/products.service.ts),
-[обработчик снимков Store](../../backend/service/sellgar.store.service/src/api/v1/store-product/service/snapshot-event.service.ts),
+[обработчик снимков Store](../../backend/service/sellgar.store.service/code/src/api/v1/store-product/service/snapshot-event.service.ts),
 [события Product](../../backend/service/sellgar.product.service/code/service/src/integration/outbox/product-outbox.service.ts).
 
 | Сценарий после добавления | Представление и действия в Cart | Основание |
@@ -630,7 +630,7 @@ Cart защищает собственные позиции, но не подт�
 
 Целевая схема на 2026-11-16: 14 таблиц — три собственные, семь проекций
 и четыре служебные. Реализована в Cart Service явной миграцией
-[CreateCart1794830000000](../../backend/service/sellgar.cart.service/src/database/migrations/1794830000000-create-cart.ts).
+[CreateCart1794830000000](../../backend/service/sellgar.cart.service/code/src/database/migrations/1794830000000-create-cart.ts).
 Перечислены все столбцы, без автоматического копирования исходных таблиц.
 Знак `?` означает nullable; остальные столбцы обязательны.
 
@@ -742,7 +742,7 @@ ownerUuid, включая владельца без созданных корз�
 заказа с доставкой определяются в контракте Order до запуска оплаты.
 
 Источник существующей идентичности цены:
-[PriceHistoryModel](../../backend/service/sellgar.store.service/src/api/v1/store-product/model/price-history.model.ts).
+[PriceHistoryModel](../../backend/service/sellgar.store.service/code/src/api/v1/store-product/model/price-history.model.ts).
 
 #### Операции и согласованность
 

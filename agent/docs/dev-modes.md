@@ -18,7 +18,7 @@ cp .env.example .env
 | Режим | Когда использовать | Команды | Основные URL |
 |---|---|---|---|
 | Только backend services | Проверяешь gateway/service contract без frontend | запуск нужных services из [dev-command-matrix.md](dev-command-matrix.md) | admin gateway `http://localhost:4020`, socket gateway `http://localhost:4040`, services по локальным портам |
-| Media infra | Проверяешь upload/CDN/MinIO | `cd backend/service/sellgar.media.service && docker compose up -d` | MinIO `http://localhost:9001`, CDN `http://localhost:8088` |
+| Media infra | Проверяешь upload/CDN/MinIO | `cd backend/service/sellgar.media.service/code && docker compose up -d` | MinIO `http://localhost:9001`, CDN `http://localhost:8088` |
 | Admin UI + локальный backend | Проверяешь пользовательский сценарий в браузере | поднять backend services, затем `cd frontend/sellgar.ui.admin/code && yarn dev:admin_ui` | `http://localhost:3000` |
 | Service-only | Меняешь один service | `yarn build`/`dotnet build`, затем локальный run service | порт сервиса из package docs |
 | Workspace smoke | Нужно понять, что уже запущено | `./agent/scripts/health-check.sh full` | сводка health endpoints |
@@ -35,7 +35,7 @@ Build доказывает только компиляцию. Для задач 
 
 `sellgar.identity.service` принимает доменные команды через RMQ; внутренний HTTP `/health` на `PORT` (default 8080) проверяет PostgreSQL и RMQ consumer. `sellgar.product.service` принимает доменные команды и File events через RMQ; внутренний `/health` на `PORT` (default 8080) проверяет PostgreSQL и оба consumer. Для обоих нужны логи подписки на очередь и сценарий через gateway/frontend.
 
-`sellgar.shop.service` обслуживает магазины/контакты/адреса через RMQ и имеет внутренний `/health` на PORT (default 8080), проверяющий PostgreSQL и RMQ consumer. `sellgar.store.service` принимает доменные команды через RMQ. Для изменения поведения нужны соответствующие runtime-сценарии, а не только build/bootstrap.
+`sellgar.shop.service` обслуживает магазины/контакты/адреса через RMQ и имеет внутренний `/health` на PORT (default 8080), проверяющий PostgreSQL и RMQ consumer. `sellgar.store.service` принимает команды и события через RMQ, внутренний `/health` проверяет PostgreSQL и оба consumer на `PORT` (default 8080). Для изменения поведения нужны соответствующие runtime-сценарии, а не только build/bootstrap.
 
 ## Dependency Install
 

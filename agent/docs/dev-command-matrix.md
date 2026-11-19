@@ -116,7 +116,7 @@ yarn dev:product_srv
 Рабочая директория:
 
 ```bash
-cd backend/service/sellgar.store.service
+cd backend/service/sellgar.store.service/code
 ```
 
 Команды:
@@ -126,11 +126,14 @@ yarn build
 yarn start:dev
 ```
 
-Сервис подготовлен как RMQ-only scaffold. Таблицы `store_product`, `store_variant`, price history, inventory и reservation проектировать до реализации.
+Store владеет ассортиментом, категориями, учётными записями, ценами и остатками.
+Команды/события идут через RMQ; внутренний `/health` на `PORT` (default 8080)
+проверяет PostgreSQL и оба consumer. Проверки: `yarn test --runInBand`,
+`yarn test:integration`; в Kubernetes Ingress нет. Резервы заказов не реализованы.
 
 ### Cart Service
 
-Рабочая директория: `backend/service/sellgar.cart.service`.
+Рабочая директория: `backend/service/sellgar.cart.service/code`.
 
 ```bash
 yarn migration:run
@@ -141,8 +144,8 @@ yarn test:smoke
 yarn start:dev
 ```
 
-RMQ-only: `cart_srv.command.queue`, `cart_srv.event.queue`, health command
-`cart.health`; HTTP listen отсутствует. Отдельная PostgreSQL база `cart_srv`.
+Доменные команды: `cart_srv.command.queue`, `cart_srv.event.queue`, health command
+`cart.health`; внутренний `/health` на 8080 проверяет PostgreSQL и оба consumer. Отдельная PostgreSQL база `cart_srv`.
 Bootstrap читает Store/Product/Shop, проекции обновляются событиями владельцев.
 Integration/smoke создают только собственные случайные схемы; smoke также
 использует изолированные очереди/exchange. Детали команд, доверенного ownerUuid
@@ -174,24 +177,24 @@ Shop владеет магазинами, контактами, адресами
 Рабочая директория:
 
 ```bash
-cd backend/service/sellgar.file.service
+cd backend/service/sellgar.file.service/code
 ```
 
 Команды:
 
 ```bash
-yarn build
-yarn start:dev
+yarn build:file_srv
+yarn start:file_srv.dev
 ```
 
-Ожидаемый локальный порт: `5040`.
+Ожидаемый локальный порт: `5040`; Kubernetes использует 8080.
 
 ### Media Service
 
 Рабочая директория:
 
 ```bash
-cd backend/service/sellgar.media.service
+cd backend/service/sellgar.media.service/code
 ```
 
 Команды:

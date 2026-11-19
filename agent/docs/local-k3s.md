@@ -386,3 +386,18 @@ CI `44622698311`, source `510150db22a06e7e092e37c868dd55a344d94125`: все че
 
 Общий механизм: `infrastructure/sellgar.infrastructure/docs/helm-delivery.md`.
 Остальные сервисы пока сохраняют прежнюю доставку.
+
+
+## Автоматическая доставка приложений
+
+Admin UI, витрина, три gateway и сервисы Identity, Shop, Product, Store, Cart,
+File и Media публикуют проверенный образ и Helm OCI-пакет через CI своего
+репозитория. Argo CD обнаруживает dev-пакеты автоматически; коммит infrastructure
+на каждый выпуск не нужен. Helm values и ConfigMap принадлежат сервису,
+секреты остаются в Kubernetes. Prod promotion запускается вручную из master;
+production среда пока не развёрнута.
+
+Контракт, права GHCR и период обновления описаны в
+[Helm delivery](../../infrastructure/sellgar.infrastructure/docs/helm-delivery.md),
+доступы новых сервисов — в
+[Cart, File и Media](../../infrastructure/sellgar.infrastructure/docs/commerce-services.md).

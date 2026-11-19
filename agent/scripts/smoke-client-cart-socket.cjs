@@ -9,7 +9,7 @@ const { parseEnv } = require("node:util");
 const root = resolve(__dirname, "../..");
 const repos = {
   identity: "backend/service/sellgar.identity.service/code",
-  cart: "backend/service/sellgar.cart.service",
+  cart: "backend/service/sellgar.cart.service/code",
   client: "backend/gateway/sellgar.client.gateway/code",
   socket: "backend/gateway/sellgar.socket.gateway/code",
 };
