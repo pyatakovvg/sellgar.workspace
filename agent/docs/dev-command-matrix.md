@@ -95,17 +95,21 @@ Runtime smoke также проверяет гостевую сессию чер
 Рабочая директория:
 
 ```bash
-cd backend/service/sellgar.product.service
+cd backend/service/sellgar.product.service/code
 ```
 
 Команды:
 
 ```bash
-yarn build
-yarn start:dev
+yarn build:product_srv
+yarn workspace @service/product test --runInBand
+yarn dev:product_srv
 ```
 
-Сервис сейчас RMQ-only: HTTP port/`/health` не поднимается. Для product changes build недостаточен. Минимальный smoke: получить/сохранить товар с variants/images через admin UI или gateway/API consumer.
+Доменные команды принимаются через RMQ. Внутренний `GET /health` на `PORT`
+(default 8080) проверяет PostgreSQL и оба consumer (commands/events); в Kubernetes
+внешнего Ingress нет. Для product changes нужен сценарий с variants/images
+через admin UI/gateway либо production-image smoke на временных БД и broker.
 
 ### Store Service
 

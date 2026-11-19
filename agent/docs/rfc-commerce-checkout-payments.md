@@ -543,7 +543,7 @@ integration-границу и закрывает корзины прежнего
 [Store Offer](../../backend/service/sellgar.store.service/src/api/v1/store-product/model/store-offer.model.ts),
 [политика Client Gateway](../../backend/gateway/sellgar.client.gateway/src/api/products/v1/products.service.ts),
 [обработчик снимков Store](../../backend/service/sellgar.store.service/src/api/v1/store-product/service/snapshot-event.service.ts),
-[события Product](../../backend/service/sellgar.product.service/service/src/integration/outbox/product-outbox.service.ts).
+[события Product](../../backend/service/sellgar.product.service/code/service/src/integration/outbox/product-outbox.service.ts).
 
 | Сценарий после добавления | Представление и действия в Cart | Основание |
 |---|---|---|

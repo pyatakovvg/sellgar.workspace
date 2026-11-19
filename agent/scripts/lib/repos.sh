@@ -74,7 +74,7 @@ repo_dir() {
       printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.product.service"
       ;;
     sellgar.outbox.library)
-      printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.product.service/library/sellgar.outbox.library"
+      printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.product.service/code/library/sellgar.outbox.library"
       ;;
     sellgar.store.service)
       printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.store.service"

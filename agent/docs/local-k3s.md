@@ -330,3 +330,39 @@ profile; the password was not changed or stored in repository files.
 Оставшийся frontend-дефект: список магазинов не получает новую строку сразу
 после закрытия формы, пока страницу не обновить. Автоматическая синхронизация
 списка требует отдельной доработки; backend-запись и повторное чтение проверены.
+
+
+## Product rollout (2026-11-20)
+
+- Product переведён на `code/` (Yarn root, `service`, `_service`, nested outbox),
+  корневые Dockerfile/CI и service-owned `helm/`. Legacy не включён в Docker context.
+- `dev-product-service`: одна реплика, HTTP/Service 8080, без Ingress. Очереди
+  `product.v2.commands` и `product.v2.events`, exchange `event.exchange` сохранены.
+- CloudNativePG создал отдельные database/login `product_srv_v2` из Secret
+  `product-database`, без superuser и с retain reclaim policy. Семь миграций
+  применены Sync Job до старта Deployment. Локальные товары не импортировались,
+  права личного `sellgar` не менялись.
+- `.env` монтируется из ConfigMap. Пароли поступают из Secret env refs;
+  `PRODUCT_AMQP_URL` собирается Kubernetes env expansion из secret env-полей.
+- В readiness проверяются PostgreSQL и оба RMQ consumer. Runtime остаётся
+  non-root/read-only; PostgreSQL 16 присутствует только в test stage Dockerfile.
+- 104 теста проходят, в том числе SQL-проекции изображений и четыре новых
+  readiness-теста. Семь FTS-тестов по env-флагу не запускались; реальный prefix
+  search проверен production-image smoke с PostgreSQL 16.
+- Smoke проверил пустую базу, семь миграций и их повторный запуск, создание и
+  изменение товара, три варианта, image projection из File events, ошибки 400/409,
+  четыре полных outbox snapshots в порядке версий 1 → 4 и health 503 после
+  отключения проверочного RabbitMQ. Рабочие volumes не использовались.
+- CI `44614717883` завершился успешно: source
+  `a76bd00eaedd8cfa84752c21771789b20fcb7d4c`, digest
+  `sha256:f31bb58d3850341588dc39e3cfe0a21eab9b6f9d759cdc4744308b48e2d163a7`.
+  Argo CD — Synced/Healthy, Deployment 1/1; прод не развёрнут.
+- Через dev-админку созданы бренд `dev-brand`, шаблон
+  `1035968a-c159-44f0-b62c-ebc91ac2a5db` и тестовый товар
+  `6b898082-fcdf-4a35-94ee-b248c23ac6b6` с одним вариантом. После перезагрузки
+  список показывает товар; карточка повторно открыта из списка с сохранёнными
+  брендом, шаблоном и описаниями. В реальной базе outbox-событие имеет published.
+- Отдельный frontend-дефект: список товаров, как и магазинов, не обновляется
+  сразу после создания. Store/File/Media ещё не развёрнуты; витрина и загрузка
+  реальных изображений требуют следующих этапов.
+- Подробности: `infrastructure/sellgar.infrastructure/docs/product-service.md`.
