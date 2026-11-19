@@ -2,7 +2,13 @@
 
 Этот workspace содержит рабочие репозитории Sellgar как git submodules.
 
-Submodule - это не "всегда latest master", а ссылка на конкретный commit. `.gitmodules` указывает `branch = master`, но workspace фиксирует gitlink. Это намеренно: агент и разработчик получают воспроизводимый набор commit'ов.
+Submodule — это ссылка на конкретный commit. `.gitmodules` указывает
+`branch = development`, но workspace фиксирует gitlink. Это намеренно: агент
+и разработчик получают воспроизводимый набор commit'ов.
+
+Рабочая ветка всех repositories — `development`, ветка выпуска — `master`.
+После публикации выпуска `master` сливается в `development`. Фреймворк остаётся
+на `development`; его изменения публикуются в эту ветку. `main` не используется.
 
 ## Первичный Старт
 
@@ -11,7 +17,7 @@ git submodule update --init --recursive
 ./agent/scripts/status-all.sh
 ```
 
-## Ежедневный Sync С Master
+## Явный Sync С Master
 
 ```bash
 ./agent/scripts/submodules-sync-master.sh
@@ -25,6 +31,9 @@ git submodule update --init --recursive
 - не трогает feature branches;
 - не трогает dirty submodules;
 - показывает состояние всех рабочих деревьев.
+
+Это явная операция синхронизации production-веток. Обычная работа ведётся
+в `development`; скрипт не переключает её на `master`.
 
 Если после sync изменились gitlinks, коммить их отдельно:
 

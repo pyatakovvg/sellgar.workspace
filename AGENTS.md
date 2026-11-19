@@ -15,4 +15,4 @@
 - Для backend-задач после workspace route читай ближайший `AGENTS.md` в `backend/gateway/*` или `backend/service/*`.
 - Для frontend/mobile-задач после workspace route читай ближайший `AGENTS.md` в соответствующем submodule, если он есть.
 - Не включай `.idea/`, `.agents/`, `.codex/`, `node_modules/`, generated output и локальные env-файлы в общий поиск feature-code. Выбранные `SKILL.md` и их необходимые references читай по маршруту задачи; остальное открывай только по необходимости.
-- Все рабочие ветки процессов Sellgar по умолчанию ведутся через `master`, если пользователь не сказал другое.
+- Рабочая ветка всех репозиториев Sellgar — `development`; основная ветка выпуска — `master`. После выпуска изменения из `master` возвращаются в `development`.

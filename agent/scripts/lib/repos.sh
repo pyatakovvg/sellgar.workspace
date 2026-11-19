@@ -7,6 +7,7 @@ WORKSPACE_DIR="$(cd "$AGENT_DIR/.." && pwd)"
 
 REPOS=(
   "sellgar.workspace"
+  "sellgar.infrastructure"
   "sellgar.admin.gateway"
   "sellgar.client.gateway"
   "sellgar.socket.gateway"
@@ -27,6 +28,7 @@ REPOS=(
 )
 
 CLONE_REPOS=(
+  "sellgar.infrastructure"
   "sellgar.admin.gateway"
   "sellgar.client.gateway"
   "sellgar.socket.gateway"
@@ -52,6 +54,9 @@ repo_dir() {
   case "$repo" in
     sellgar.workspace)
       printf '%s\n' "$WORKSPACE_DIR"
+      ;;
+    sellgar.infrastructure)
+      printf '%s\n' "$WORKSPACE_DIR/infrastructure/sellgar.infrastructure"
       ;;
     sellgar.admin.gateway)
       printf '%s\n' "$WORKSPACE_DIR/backend/gateway/sellgar.admin.gateway"
