@@ -39,12 +39,14 @@ sellgar.infrastructure/
 
 `admin-ui/` содержит подключение админки; остальные сервисы подключаются
 по той же схеме. Prod-сервисы пока не подключены.
-`application.yaml` указывает Argo CD источники chart и values, зафиксированные
-ревизии, namespace назначения и выбранный digest образа из CI в Helm parameters.
-Общие values и настройки среды принадлежат приложению; их копии
-в инфраструктурном репозитории не создаются. Argo CD получает общий chart
-из инфраструктуры, а `helm/values.app.yaml` и `helm/<environment>/values.yaml`
-из репозитория приложения.
+Для админки `application.yaml` указывает постоянный Helm OCI repository своей среды.
+CI сервиса публикует туда пакет с проверенным image digest и конфигурацией из того же
+source commit; Argo CD отслеживает новые версии. Коммиты в infrastructure на каждый
+выпуск админки не нужны. Остальные приложения пока используют прежний multi-source
+механизм с chart/values по SHA и image digest в параметрах Application.
+Общие values и настройки среды принадлежат приложению, их копии в инфраструктурном
+репозитории не создаются. Общий delivery action и chart находятся в infrastructure;
+в CI они подключаются по закреплённому commit.
 
 `platform/` содержит описание общих компонентов: PostgreSQL, RabbitMQ, MinIO, TLS
 и мониторинга. `ansible/` отвечает за подготовку серверов и K3s,
@@ -81,9 +83,9 @@ Inventory опубликован в `master` и `development`; рабочий ch
 Витрина развёрнута на `http://dev.sellgar.io/` по той же схеме, одной репликой. По решению
 пользователя от 19 ноября 2026 года backend остаётся отдельным этапом:
 до его подключения корень витрины возвращает 503, `/healthz` проверяет Next.js.
-Конфигурация подключений находится в инфраструктуре:
-`environments/dev/services/<admin-ui|storefront>/application.yaml`. Chart, values и образ
-зафиксированы по SHA/digest; CI пока не обновляет инфраструктурный Git автоматически.
+Постоянные подключения находятся в инфраструктуре:
+`environments/dev/services/<admin-ui|storefront>/application.yaml`. Админка получает
+версии из Helm OCI; storefront пока использует закреплённые SHA/digest.
 TLS, операторы и deployment остальных сервисов пока не подключены.
 
 ## Виртуальная машина
@@ -366,3 +368,21 @@ profile; the password was not changed or stored in repository files.
   сразу после создания. Store/File/Media ещё не развёрнуты; витрина и загрузка
   реальных изображений требуют следующих этапов.
 - Подробности: `infrastructure/sellgar.infrastructure/docs/product-service.md`.
+
+## Автоматическая доставка админки через Helm OCI, 20 ноября 2026
+
+Прежний CI публиковал образ без передачи версии для deployment. Исправленная цепочка:
+`development push → build → smoke → image publish → Helm package publish → Argo CD`.
+Настройки `helm/` остаются у сервиса. Kubernetes credentials в GitHub не передаются.
+Prod-пакет может опубликовать только ручной workflow из master с проверенным
+release-кандидатом, без пересборки image; prod-кластер ещё не подключён.
+
+CI `44622698311`, source `510150db22a06e7e092e37c868dd55a344d94125`: все четыре jobs
+успешны. Argo CD выбрал Helm `0.44622698311.1`, выполнил rollout image
+`sha256:46a32899d0f5efdf760ef28393021707dacf44031074bfad2ec9b466d953c2b6`.
+Состояние Synced/Healthy, готовность 1/1. Проверены config.js и `/admin/templates`
+во встроенном браузере. Дополнительный повтор job отклонён auto-review и не выполнялся;
+обнаружение следующей публикации отдельно не проверялось.
+
+Общий механизм: `infrastructure/sellgar.infrastructure/docs/helm-delivery.md`.
+Остальные сервисы пока сохраняют прежнюю доставку.
