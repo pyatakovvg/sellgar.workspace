@@ -4,6 +4,34 @@
 - Область выполненных шагов: установка Kubernetes, доступ к API, проверка базовых
   компонентов, подготовка образов общей инфраструктуры и dev-деплой админки.
 
+## Переход на два dev-домена, 20 ноября 2026
+
+Целевые адреса — `https://dev.sellgar.ru/` для витрины и
+`https://admin.dev.sellgar.ru/` для админки без `/admin`.
+`sellgar.ru` и `admin.sellgar.ru` не подключаются: prod остаётся отдельным этапом.
+Одна реплика приложений, внутренний HTTP 8080 и существующие данные сохраняются.
+
+cert-manager установлен, namespaced Issuer `sellgar-dev/letsencrypt` Ready,
+REG.RU DNS webhook Available. Владелец создал Secret `cert-manager/regru-api`
+через интерактивный локальный ввод; доступ к DNS API проверен из VM.
+Certificate `sellgar-dev-tls` содержит только два dev-имени и имеет Ready=True.
+После публикации делегирования cert-manager автоматически завершил DNS-01.
+Издатель Let's Encrypt YR1, срок до 18 февраля 2027 года, продление запланировано
+на 19 января 2027 года. Локальный hosts содержит
+`192.168.122.10 dev.sellgar.ru admin.dev.sellgar.ru`.
+
+В Helm приложений установлены новые HTTPS hosts, публичные API/Socket/CDN URL,
+Secure cookies; админка собрана для корня отдельного origin. Все шесть релизов
+прошли CI и автоматически раскатаны Argo CD, состояние Synced/Healthy. Витрина,
+админка и обе ветки API отвечают HTTP 200 по HTTPS с проверкой доверия сертификата.
+HTTP возвращает 301 на соответствующий HTTPS URL через штатный K3s
+HelmChartConfig. Ingress на `dev.sellgar.io` больше нет.
+В браузере подтверждены сессия админки, service worker `/sw.js` со scope
+`https://admin.dev.sellgar.ru/` и сокетное обновление корзины; тестовое добавление
+и удаление восстановили исходное количество 0.
+
+Порядок: [dev HTTPS](../../infrastructure/sellgar.infrastructure/docs/dev-https.md).
+
 ## Принятая организация репозиториев
 
 Уточнение пользователя 19 ноября 2026 года по примеру
