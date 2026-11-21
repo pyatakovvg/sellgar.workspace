@@ -436,3 +436,15 @@ production среда пока не развёрнута.
 [Helm delivery](../../infrastructure/sellgar.infrastructure/docs/helm-delivery.md),
 доступы новых сервисов — в
 [Cart, File и Media](../../infrastructure/sellgar.infrastructure/docs/commerce-services.md).
+
+## Перенос цен на учётные записи, 21 ноября 2026
+
+Store, Cart, оба gateway и оба UI обновлены согласованно: временная пауза
+автораскатки, проверенные CI/Helm-пакеты, остановка старых писателей, резервные
+копии с пробным восстановлением, миграции и сверка данных. Сохранены 48 учёток,
+остатки, уточнения, полная история цен и исходные позиции корзин. Проверена
+реальная доставка изменения отдельной цены через Store → Cart → Client → Socket;
+тестовые значения восстановлены. Прод не затрагивался.
+
+Порядок, версии выпусков, backup и ограничения отката:
+[результат перехода](../../infrastructure/sellgar.infrastructure/docs/accounting-record-prices-rollout.md).
