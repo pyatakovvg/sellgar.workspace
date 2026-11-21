@@ -142,6 +142,13 @@ ssh -i "$VM_STATE/id_ed25519" \
 VM запускается вручную через libvirt; автозапуск VM при загрузке хоста не включён.
 Внутри VM сервис K3s должен запускаться через systemd автоматически.
 
+Подключения хоста к PostgreSQL (`15432`), RabbitMQ UI (`15674`), Admin gateway
+(`4020`) и Client gateway (`4030`) принадлежат пользовательскому systemd target
+`sellgar-dev-tunnels.target`, а не локальным watcher или агентским сессиям.
+Они автоматически запускаются вместе с user manager (linger включён) и повторяют
+подключение при недоступности VM или смене pod. Запуск/остановка watcher не меняет
+их состояние. Исходники и установка: [постоянные туннели](../../infrastructure/sellgar.infrastructure/bootstrap/README.md#постоянные-туннели-dev-среды).
+
 Для доступа к GitHub через VPN хоста MTU интерфейса VM `enp1s0` закреплён
 в 1380; MTU Flannel и новых pod — 1330. Исходник netplan и инструкция
 находятся в `infrastructure/sellgar.infrastructure/bootstrap/local-vm/`

@@ -184,6 +184,7 @@ async function run() {
   const migrations = [
     "1794830000000-create-cart",
     "1794830001000-require-complete-price",
+    "1795300000000-record-prices",
   ].flatMap((name) =>
     Object.values(load("cart", `database/migrations/${name}`)),
   );
@@ -211,7 +212,7 @@ async function run() {
     `SELECT ar.uuid,sp.shop_uuid FROM accounting_record_snapshot ar
     JOIN store_offer_snapshot o ON o.uuid=ar.offer_uuid JOIN store_product_snapshot sp ON sp.uuid=o.store_product_uuid
     JOIN product_snapshot p ON p.uuid=sp.product_uuid JOIN variant_snapshot v ON v.uuid=o.variant_uuid
-    JOIN record_inventory_snapshot i ON i.record_uuid=ar.uuid WHERE sp.status='active' AND sp.showing AND o.status='active' AND o.showing AND p.status='active' AND v.status='active' AND i.available>0 AND o.currency_code=$1 LIMIT 1`,
+    JOIN record_inventory_snapshot i ON i.record_uuid=ar.uuid WHERE sp.status='active' AND sp.showing AND o.status='active' AND o.showing AND p.status='active' AND v.status='active' AND i.available>0 AND ar.currency_code=$1 LIMIT 1`,
     [env.cart.CART_CURRENCY_CODE],
   );
   assert.ok(record, "Source services must have a sellable record");

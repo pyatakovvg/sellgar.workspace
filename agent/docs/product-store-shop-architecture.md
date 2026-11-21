@@ -277,9 +277,9 @@ shop.updated
 - `store_product` - факт, что конкретный `shop` продает конкретный `product`.
 - `store_offer` - продажное предложение конкретного `variant` внутри конкретного
   `store_product`.
-- `price_history` - история цены `store_offer`.
-- `offer_inventory` - текущее состояние остатка и резерва `store_offer`.
-- `inventory_movement` - история причин, по которым изменился остаток или резерв.
+- `price_history` - история цены `accounting_record` (решение пользователя 2026-11-21).
+- `record_inventory` - текущее состояние остатка и резерва `accounting_record`.
+- `inventory_movement` - история причин изменения остатка или резерва учётной записи.
 
 Ключевая формула модели:
 
@@ -287,9 +287,10 @@ shop.updated
 Product -> Variant
 Shop + Product -> StoreProduct
 StoreProduct + Variant -> Offer
-Offer -> PriceHistory
-Offer -> OfferInventory
-Offer -> InventoryMovement
+Offer -> AccountingRecord
+AccountingRecord -> PriceHistory
+AccountingRecord -> RecordInventory
+AccountingRecord -> InventoryMovement
 ```
 
 `Offer` не является nullable-добавкой к `variant`. Если вариант еще не продается в магазине, для
