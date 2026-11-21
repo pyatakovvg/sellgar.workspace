@@ -19,6 +19,18 @@ Argo CD управляет только платформой. Старый repos
 Обслуживание runner и срок сертификата: [runner](../../infrastructure/sellgar.infrastructure/bootstrap/runner/README.md).
 Prod на этот механизм пока не подключён.
 
+## Имена Product, 22 ноября 2026
+
+Канонические database/login и producer событий — `product_srv`; очереди —
+`product.commands` и `product.events`. Ключи Product — `PRODUCT_COMMAND_QUEUE` /
+`PRODUCT_EVENT_QUEUE`, Store/Cart — `PRODUCT_COMMAND_QUEUE`. Оба gateway используют
+прежний `AMQP_PRODUCT_SRV_COMMAND_QUEUE` с новым значением очереди.
+Версии `catalog.v2.*`, HTTP и schemaVersion сохраняются.
+Переименование dev-базы и роли сохранило OID и права, 11 товаров, 26 вариантов и
+40 проекций изображений. Локальная legacy-база удалена по разрешению пользователя;
+рабочая переименована с сохранением 13 товаров и 19 вариантов.
+Порядок перехода и результаты: [Product naming](../../infrastructure/sellgar.infrastructure/docs/product-naming.md).
+
 ## Переход на два dev-домена, 20 ноября 2026
 
 Целевые адреса — `https://dev.sellgar.ru/` для витрины и

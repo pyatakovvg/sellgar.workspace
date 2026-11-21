@@ -5,7 +5,7 @@
 > остатками. Старые описания offer_inventory и offerUuid для складских команд
 > ниже относятся к предыдущей модели. Принятые решения: [RFC конструктора](rfc-product-constructor.md);
 > текущие таблицы, API и миграции: [Store README](../../backend/service/sellgar.store.service/README.md).
-> Каталог Store теперь потребляет из product_srv_v2 (события schemaVersion=3).
+> Каталог Store теперь потребляет из product_srv (события schemaVersion=3).
 > По согласованию bootstrap Store использует один Nest-контекст и две RMQ-очереди,
 > без HTTP listen; inbox/outbox остаются транзакционными.
 
