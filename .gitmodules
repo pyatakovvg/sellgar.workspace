@@ -1,10 +1,10 @@
 [submodule "frontend/sellgar.ui.admin"]
 	path = frontend/sellgar.ui.admin
-	url = git@github.com:pyatakovvg/sellgar.ui.admin.git
+	url = git@github.com:sellgar/sellgar.ui.admin.git
 	branch = development
 [submodule "frontend/sellgar.ui.desktop"]
 	path = frontend/sellgar.ui.desktop
-	url = git@github.com:pyatakovvg/sellgar.ui.desktop.git
+	url = git@github.com:sellgar/sellgar.ui.desktop.git
 	branch = development
 [submodule "mobile/sellgar.mobile"]
 	path = mobile/sellgar.mobile
@@ -12,39 +12,39 @@
 	branch = development
 [submodule "backend/sellgar.admin.gateway"]
 	path = backend/gateway/sellgar.admin.gateway
-	url = git@github.com:pyatakovvg/sellgar.admin.gateway.git
+	url = git@github.com:sellgar/sellgar.admin.gateway.git
 	branch = development
 [submodule "backend/sellgar.client.gateway"]
 	path = backend/gateway/sellgar.client.gateway
-	url = git@github.com:pyatakovvg/sellgar.client.gateway.git
+	url = git@github.com:sellgar/sellgar.client.gateway.git
 	branch = development
 [submodule "backend/sellgar.product.service"]
 	path = backend/service/sellgar.product.service
-	url = git@github.com:pyatakovvg/sellgar.product.service.git
+	url = git@github.com:sellgar/sellgar.product.service.git
 	branch = development
 [submodule "backend/sellgar.identity.service"]
 	path = backend/service/sellgar.identity.service
-	url = git@github.com:pyatakovvg/sellgar.identity.service.git
+	url = git@github.com:sellgar/sellgar.identity.service.git
 	branch = development
 [submodule "backend/sellgar.file.service"]
 	path = backend/service/sellgar.file.service
-	url = git@github.com:pyatakovvg/sellgar.file.service.git
+	url = git@github.com:sellgar/sellgar.file.service.git
 	branch = development
 [submodule "backend/sellgar.media.service"]
 	path = backend/service/sellgar.media.service
-	url = git@github.com:pyatakovvg/sellgar.media.service.git
+	url = git@github.com:sellgar/sellgar.media.service.git
 	branch = development
 [submodule "backend/service/sellgar.store.service"]
 	path = backend/service/sellgar.store.service
-	url = git@github.com:pyatakovvg/sellgar.store.service.git
+	url = git@github.com:sellgar/sellgar.store.service.git
 	branch = development
 [submodule "backend/service/sellgar.shop.service"]
 	path = backend/service/sellgar.shop.service
-	url = git@github.com:pyatakovvg/sellgar.shop.service.git
+	url = git@github.com:sellgar/sellgar.shop.service.git
 	branch = development
 [submodule "backend/gateway/sellgar.socket.gateway"]
 	path = backend/gateway/sellgar.socket.gateway
-	url = git@github.com:pyatakovvg/sellgar.socket.gateway.git
+	url = git@github.com:sellgar/sellgar.socket.gateway.git
 	branch = development
 [submodule "frontend/sellgar.mobile.shop"]
 	path = frontend/sellgar.mobile.shop
@@ -52,9 +52,9 @@
 	branch = development
 [submodule "backend/service/sellgar.cart.service"]
 	path = backend/service/sellgar.cart.service
-	url = git@github.com:pyatakovvg/sellgar.cart.service.git
+	url = git@github.com:sellgar/sellgar.cart.service.git
 	branch = development
 [submodule "infrastructure/sellgar.infrastructure"]
 	path = infrastructure/sellgar.infrastructure
-	url = git@github.com:pyatakovvg/sellgar.infrastructure.git
+	url = git@github.com:sellgar/sellgar.infrastructure.git
 	branch = development

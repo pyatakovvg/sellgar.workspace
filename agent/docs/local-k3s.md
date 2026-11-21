@@ -4,18 +4,19 @@
 - Область выполненных шагов: установка Kubernetes, доступ к API, проверка базовых
   компонентов, подготовка образов общей инфраструктуры и dev-деплой админки.
 
-## Product: CI-доставка, 21 ноября 2026
+## Общая CI-доставка, 21 ноября 2026
 
-Product первым переведён на прямую Helm-доставку через GitHub Actions:
-build → publish → параллельно test/migrate → deploy. Официальный repository runner
-`sellgar-product-dev` установлен в VM отдельной systemd-службой; он выполняет
-только migrate/deploy с Kubernetes-доступом к `sellgar-dev`. Сборка и компонентные
-тесты выполняются на GitHub. Управление Product передано от Argo CD к Helm;
-остальные приложения сохраняют прежнюю Argo/OCI-доставку.
+Все 12 dev-приложений переданы от Argo CD к прямой Helm-доставке через GitHub Actions.
+Для приложений с БД: unit → build → publish → migrate → deploy; без БД этапа migrate нет.
+Один organization runner `sellgar-dev` установлен в VM отдельной systemd-службой;
+он выполняет только migrate/deploy с доступом к `sellgar-dev`. Юнит-тесты, сборка и
+публикация выполняются на GitHub. Компонентные jobs пока не включены.
+Argo CD управляет только платформой. Старый repository runner Product удалён.
 
-Первый полный проход завершён успешно. Контракт, результаты, обслуживание runner
-и срок его сертификата: [Product delivery](../../infrastructure/sellgar.infrastructure/docs/product-delivery.md)
-и [runner](../../infrastructure/sellgar.infrastructure/bootstrap/runner/README.md).
+Все 12 последних CI завершились успешно; подтверждены source SHA, digest и readiness.
+Контракт: [доставка приложений](../../infrastructure/sellgar.infrastructure/docs/application-delivery.md).
+Результаты: [12 CI](../../infrastructure/sellgar.infrastructure/docs/organization-transition.md#проверка-delivery-v070).
+Обслуживание runner и срок сертификата: [runner](../../infrastructure/sellgar.infrastructure/bootstrap/runner/README.md).
 Prod на этот механизм пока не подключён.
 
 ## Переход на два dev-домена, 20 ноября 2026
