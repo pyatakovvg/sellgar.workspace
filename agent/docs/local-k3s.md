@@ -4,6 +4,20 @@
 - Область выполненных шагов: установка Kubernetes, доступ к API, проверка базовых
   компонентов, подготовка образов общей инфраструктуры и dev-деплой админки.
 
+## Product: CI-доставка, 21 ноября 2026
+
+Product первым переведён на прямую Helm-доставку через GitHub Actions:
+build → publish → параллельно test/migrate → deploy. Официальный repository runner
+`sellgar-product-dev` установлен в VM отдельной systemd-службой; он выполняет
+только migrate/deploy с Kubernetes-доступом к `sellgar-dev`. Сборка и компонентные
+тесты выполняются на GitHub. Управление Product передано от Argo CD к Helm;
+остальные приложения сохраняют прежнюю Argo/OCI-доставку.
+
+Первый полный проход завершён успешно. Контракт, результаты, обслуживание runner
+и срок его сертификата: [Product delivery](../../infrastructure/sellgar.infrastructure/docs/product-delivery.md)
+и [runner](../../infrastructure/sellgar.infrastructure/bootstrap/runner/README.md).
+Prod на этот механизм пока не подключён.
+
 ## Переход на два dev-домена, 20 ноября 2026
 
 Целевые адреса — `https://dev.sellgar.ru/` для витрины и
