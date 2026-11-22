@@ -58,3 +58,7 @@
 	path = infrastructure/sellgar.infrastructure
 	url = git@github.com:sellgar/sellgar.infrastructure.git
 	branch = development
+[submodule "backend/library/sellgar.pagination.library"]
+	path = backend/library/sellgar.pagination.library
+	url = git@github.com:sellgar/sellgar.pagination.library.git
+	branch = development

@@ -34,6 +34,7 @@
 | Product/Store/Shop архитектура, цены, остатки | [product-store-shop-architecture.md](product-store-shop-architecture.md) | affected service `AGENTS.md` |
 | RFC конструктора товаров, примитивы и детализация учета | [rfc-product-constructor.md](rfc-product-constructor.md) | принятые решения и открытые вопросы RFC |
 | RFC корзины, оформления заказа и платежей без Billing | [rfc-commerce-checkout-payments.md](rfc-commerce-checkout-payments.md) | границы сервисов, операции, статистика и открытые решения |
+| Общая курсорная пагинация и списочные контракты | [cursor-pagination.md](cursor-pagination.md) | @sellgar/pagination, владельцы API, gateway и consumers |
 | Общая гостевая сессия, жизненный цикл Identity и bootstrap витрины | [guest-sessions.md](guest-sessions.md) | проверки Identity/Client/Socket, браузер витрины и изолированный smoke |
 | Client Cart, приватная доставка Socket и проверка связки шлюзов | [cart-gateway-integration.md](cart-gateway-integration.md) | README затронутых gateway/Identity и полный изолированный smoke |
 | Backlog commerce admin и решение по новым сервисам | [admin-commerce-backlog.md](admin-commerce-backlog.md) | [product-store-shop-architecture.md](product-store-shop-architecture.md) |
