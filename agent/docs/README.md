@@ -45,6 +45,9 @@
 | Product service | `backend/service/sellgar.product.service/AGENTS.md` | product contract smoke, особенно images/variants |
 | Store service | `backend/service/sellgar.store.service/AGENTS.md` | sellable product design/build |
 | Cart service | `backend/service/sellgar.cart.service/AGENTS.md` | build, PostgreSQL integration и изолированный RMQ smoke |
+| Order service | `backend/service/sellgar.order.service/AGENTS.md` | build, unit/integration, `smoke-order-checkout.cjs`; тестовый Payment подключён, публичный gateway и экраны ещё отсутствуют |
+| Payment service | `backend/service/sellgar.payment.service/AGENTS.md` | тестовая интеграция; build, unit/integration и сквозной smoke Order; банковского провайдера нет |
+| Деплой Order/Payment | `infrastructure/sellgar.infrastructure/docs/checkout-services.md` | первый dev rollout проверен: CI, миграции, digest, health и RMQ; локальные Docker-проверки — `smoke-checkout-images.cjs` |
 | Shop service | `backend/service/sellgar.shop.service/AGENTS.md` | shop/channel design/build |
 | File service | `backend/service/sellgar.file.service/AGENTS.md` | file metadata API smoke |
 | Media service | `backend/service/sellgar.media.service/AGENTS.md` | media upload/CDN/MinIO smoke |
@@ -65,6 +68,8 @@ Backend:
 - `backend/service/sellgar.product.service/AGENTS.md`
 - `backend/service/sellgar.store.service/AGENTS.md`
 - `backend/service/sellgar.cart.service/AGENTS.md`
+- `backend/service/sellgar.order.service/AGENTS.md`
+- `backend/service/sellgar.payment.service/AGENTS.md`
 - `backend/service/sellgar.shop.service/AGENTS.md`
 - `backend/service/sellgar.file.service/AGENTS.md`
 - `backend/service/sellgar.media.service/AGENTS.md`

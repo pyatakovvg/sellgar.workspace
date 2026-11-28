@@ -129,7 +129,10 @@ yarn start:dev
 Store владеет ассортиментом, категориями, учётными записями, ценами и остатками.
 Команды/события идут через RMQ; внутренний `/health` на `PORT` (default 8080)
 проверяет PostgreSQL и оба consumer. Проверки: `yarn test --runInBand`,
-`yarn test:integration`; в Kubernetes Ingress нет. Резервы заказов не реализованы.
+`yarn test:integration`; в Kubernetes Ingress нет. Внутренние RMQ-команды резервов
+реализованы в Store; первый backend-этап Order/Cart проверен локально, gateway,
+экраны ещё не подключены; Payment — тестовая интеграция. Контракт —
+`backend/service/sellgar.store.service/docs/reservations.md`.
 
 ### Cart Service
 
@@ -150,6 +153,53 @@ Bootstrap читает Store/Product/Shop, проекции обновляютс
 Integration/smoke создают только собственные случайные схемы; smoke также
 использует изолированные очереди/exchange. Детали команд, доверенного ownerUuid
 и оставшихся интеграций: [Cart README](../../backend/service/sellgar.cart.service/README.md).
+
+### Order Service
+
+Рабочая директория: `backend/service/sellgar.order.service/code`.
+
+```bash
+yarn build
+yarn test --runInBand
+yarn test:integration
+```
+
+Integration создаёт случайную схему. Credentials берутся из environment или файла,
+явно указанного в `ORDER_TEST_ENV_FILE`; тестовая схема не является рабочей схемой.
+Для рабочего запуска необходим собственный `.env` по `.env.example` и миграции
+собственной базы Order. Публичного checkout API пока нет; Payment работает через
+тестовый адаптер, без банковских операций.
+
+После сборки Cart/Store/Order/Payment из workspace root:
+
+```bash
+node agent/scripts/smoke-order-checkout.cjs
+```
+
+Smoke использует четыре случайные схемы и отдельные RabbitMQ queues/exchange. Проверяет
+реальные Cart prepare, Store reserve, Order ready и применение Cart события через
+общий outbox. Только неизменяемые исходные Product/Shop snapshots задаются fixtures.
+При отказе Store выбранная строка остаётся в Cart; при ready-expiry резерв
+освобождается без списания quantity. Все тестовые ресурсы удаляются.
+Также проверяет order.pay → Payment test → payment.succeeded → Order paid через
+настоящий outbox. Processing не истекает, после оплаты резерв остаётся.
+Код первого этапа описан в Order `docs/checkout.md`. Этот изолированный smoke не
+меняет рабочие схемы. Первый dev rollout выполнен 2026-11-28; версии, CI и runtime
+проверки — `infrastructure/sellgar.infrastructure/docs/checkout-services.md`.
+
+Deploy artifacts Order/Payment описаны в их `docs/deployment.md`. После сборки
+обоих Docker targets `application`/`migration` с тегами `sellgar-<service>-deploy:<target>`:
+
+```bash
+node agent/scripts/smoke-checkout-images.cjs
+```
+
+Проверка использует новые временные PostgreSQL/RabbitMQ containers в private
+Docker network, без host ports и рабочих volumes: миграции от non-superuser дважды,
+non-root/read-only startup, production dependencies, `/health=200`, затем 503
+после остановки брокера. Временные containers/volumes/network удаляются.
+Для первого rollout дополнительно требуется инфраструктурный порядок из
+`infrastructure/sellgar.infrastructure/docs/checkout-services.md`.
 
 ### Shop Service
 

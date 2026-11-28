@@ -16,6 +16,8 @@ REPOS=(
   "sellgar.outbox.library"
   "sellgar.store.service"
   "sellgar.cart.service"
+  "sellgar.order.service"
+  "sellgar.payment.service"
   "sellgar.shop.service"
   "sellgar.file.service"
   "sellgar.media.service"
@@ -38,6 +40,8 @@ CLONE_REPOS=(
   "sellgar.outbox.library"
   "sellgar.store.service"
   "sellgar.cart.service"
+  "sellgar.order.service"
+  "sellgar.payment.service"
   "sellgar.shop.service"
   "sellgar.file.service"
   "sellgar.media.service"
@@ -83,6 +87,12 @@ repo_dir() {
       ;;
     sellgar.cart.service)
       printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.cart.service"
+      ;;
+    sellgar.order.service)
+      printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.order.service"
+      ;;
+    sellgar.payment.service)
+      printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.payment.service"
       ;;
     sellgar.shop.service)
       printf '%s\n' "$WORKSPACE_DIR/backend/service/sellgar.shop.service"

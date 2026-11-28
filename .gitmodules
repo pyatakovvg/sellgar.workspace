@@ -62,3 +62,11 @@
 	path = backend/library/sellgar.pagination.library
 	url = git@github.com:sellgar/sellgar.pagination.library.git
 	branch = development
+[submodule "backend/service/sellgar.order.service"]
+	path = backend/service/sellgar.order.service
+	url = git@github.com:sellgar/sellgar.order.service.git
+	branch = development
+[submodule "backend/service/sellgar.payment.service"]
+	path = backend/service/sellgar.payment.service
+	url = git@github.com:sellgar/sellgar.payment.service.git
+	branch = development
